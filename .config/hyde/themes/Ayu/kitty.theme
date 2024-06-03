@@ -1,0 +1,48 @@
+$HOME/.config/kitty/theme.conf|killall -SIGUSR1 kitty
+# Created by https://github.com/decaycs
+
+# Special
+background #0b0e14
+foreground #fcfcfc
+
+# Black
+color0 #565b66
+color8 #626975
+
+# Red
+color1 #d95757
+color9 #f07178
+
+# Green
+color5  #7fd962
+color13 #aad94c
+
+# Yellow
+color3  #ff8f40
+color3  #ffb454
+color11 
+
+# Blue
+color2  #39bae6
+color10 #59c2ff
+
+# Magenta
+color5  #b165fe
+color13 #a37acc
+
+# Cyan
+color6  #73d0ff
+color14 #399ee6
+
+# White
+color7  #cbced3
+color15 #d0d3d8
+
+# Cursor
+cursor #39bae6
+cursor_text_color #a5b6cf
+
+# Selection highlight
+# selection_foreground #a5b6cf
+# selection_background #1c1e27
+

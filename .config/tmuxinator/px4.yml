@@ -1,0 +1,19 @@
+# /home/radtop/.config/tmuxinator/px4.yml
+
+name: px4
+root: ~
+
+windows:
+  - px4:
+      layout:
+      panes:
+        -  cd ~/drone_ws/Firmware && bass source ~/mav_ws/devel/setup.bash && bass source ~/drone_ws/Firmware/Tools/simulation/gazebo-classic/setup_gazebo.bash ~/drone_ws/Firmware ~/drone_ws/Firmware/build/px4_sitl_default &&  set -x ROS_PACKAGE_PATH $ROS_PACKAGE_PATH ~/drone_ws/Firmware ~/drone_ws/Firmware/Tools/simulation/gazebo-classic/sitl_gazebo-classic && cls
+        - bass source ~/catkin_ws/devel/setup.bash && cd ~/catkin_ws/src && code . && cls
+        - bass source ~/catkin_ws/devel/setup.bash && clear
+        - 
+  - ranger:
+      layout: main-vertical
+      panes:
+        - z fly && ranger
+
+

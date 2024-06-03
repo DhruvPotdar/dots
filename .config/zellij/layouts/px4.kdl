@@ -1,0 +1,28 @@
+layout {
+    tab split_direction="Horizontal" {
+    pane size=1 borderless=true {
+        plugin location="zellij:compact-bar"
+    }
+    pane split_direction="Vertical" {
+        pane split_direction="Vertical" {
+            pane size="50%" size="50%" command="fish" {
+                args "-c" "px4_run"
+            } 
+            pane name="ipp_node" start_suspended=true cwd="~/catkin_ws/src" command="fish" {
+                args "-c" "roslaunch ipp_drone_sim sim.launch"
+            } 
+        }
+    }
+    pane split_direction="Vertical" {
+        pane split_direction="Vertical" {
+            pane name="sim_node" start_suspended=true size="50%" command="fish" {
+                args "-c" "rosrun ipp_node sim_node.py"
+            }  
+            pane size="50%" cwd="/home/radtop/catkin_ws/src"
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+        }
+    }
+}
