@@ -38,7 +38,7 @@ function paramStringFromObj(params) {
 class BooruService extends Service {
     _baseUrl = 'https://yande.re/post.json';
     _mode = 'yandere';
-    _nsfw = userOptions.sidebar.image.allowNsfw;
+    _nsfw = userOptions.sidebar.imageAllowNsfw;
     _responses = [];
     _queries = [];
 
@@ -72,7 +72,7 @@ class BooruService extends Service {
         this._mode = value;
         this._baseUrl = APISERVICES[this._mode].endpoint;
     }
-    get providerName() {
+    get providerName () {
         return APISERVICES[this._mode].name;
     }
     get queries() { return this._queries }
@@ -88,7 +88,7 @@ class BooruService extends Service {
         for (let i = 0; i < userArgs.length; i++) {
             const thisArg = userArgs[i].trim();
             if (thisArg.length == 0 || thisArg == '.' || thisArg.includes('*')) continue;
-            else if (!isNaN(thisArg)) page = parseInt(thisArg);
+            else if(!isNaN(thisArg)) page = parseInt(thisArg);
             else taglist.push(thisArg);
         }
         const newMessageId = this._queries.length;
@@ -102,7 +102,7 @@ class BooruService extends Service {
         const params = {
             'tags': taglist.join('+'),
             'page': `${page}`,
-            'limit': `${userOptions.sidebar.image.batchCount}`,
+            'limit': `${userOptions.sidebar.imageBooruCount}`,
         };
         const paramString = paramStringFromObj(params);
         // Fetch
@@ -113,7 +113,6 @@ class BooruService extends Service {
         };
         let status = 0;
         // console.log(`${APISERVICES[this._mode].endpoint}?${paramString}`);
-
         Utils.fetch(`${APISERVICES[this._mode].endpoint}?${paramString}`, options)
             .then(result => {
                 status = result.status;
@@ -123,7 +122,7 @@ class BooruService extends Service {
                 // console.log(dataString);
                 const parsedData = JSON.parse(dataString);
                 // console.log(parsedData)
-                this._responses[newMessageId] = parsedData.map(obj => {
+                this._responses.push(parsedData.map(obj => {
                     return {
                         aspect_ratio: obj.width / obj.height,
                         id: obj.id,
@@ -141,7 +140,7 @@ class BooruService extends Service {
                         file_height: obj.file_height,
                         source: getWorkingImageSauce(obj.source),
                     }
-                });
+                }));
                 this.emit('updateResponse', newMessageId);
             })
             .catch(print);

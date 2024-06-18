@@ -17,6 +17,6 @@ eval "$(atuin init bash)"
 
 if [[ "$(lsb_release -rs)" == "20.04" ]] && [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
 	# Replace this with the command you want to execute
-	fish 
+#	fish 
 fi
 

@@ -6,23 +6,22 @@ import App from 'resource:///com/github/Aylur/ags/app.js'
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
 // Stuff
 import userOptions from './modules/.configuration/user_options.js';
-import { firstRunWelcome, startBatteryWarningService } from './services/messages.js';
-import { startAutoDarkModeService } from './services/darkmode.js';
+import { firstRunWelcome } from './services/messages.js';
 // Widgets
 import { Bar, BarCornerTopleft, BarCornerTopright } from './modules/bar/main.js';
 import Cheatsheet from './modules/cheatsheet/main.js';
 // import DesktopBackground from './modules/desktopbackground/main.js';
 import Dock from './modules/dock/main.js';
 import Corner from './modules/screencorners/main.js';
-import Crosshair from './modules/crosshair/main.js';
 import Indicator from './modules/indicators/main.js';
 import Osk from './modules/onscreenkeyboard/main.js';
 import Overview from './modules/overview/main.js';
 import Session from './modules/session/main.js';
 import SideLeft from './modules/sideleft/main.js';
 import SideRight from './modules/sideright/main.js';
-import { COMPILED_STYLE_DIR } from './init.js';
+import Click2Close from './modules/click2close/main.js';
 
+const COMPILED_STYLE_DIR = `${GLib.get_user_cache_dir()}/ags/user/generated`
 const range = (length, start = 1) => Array.from({ length }, (_, i) => i + start);
 function forMonitors(widget) {
     const n = Gdk.Display.get_default()?.get_n_monitors() || 1;
@@ -33,15 +32,21 @@ function forMonitorsAsync(widget) {
     return range(n, 0).forEach((n) => widget(n).catch(print))
 }
 
-// Start stuff
-handleStyles(true);
-startAutoDarkModeService().catch(print);
-firstRunWelcome().catch(print);
-startBatteryWarningService().catch(print)
+// SCSS compilation
+Utils.exec(`bash -c 'echo "" > ${App.configDir}/scss/_musicwal.scss'`); // reset music styles
+Utils.exec(`bash -c 'echo "" > ${App.configDir}/scss/_musicmaterial.scss'`); // reset music styles
+async function applyStyle() {
+    Utils.exec(`mkdir -p ${COMPILED_STYLE_DIR}`);
+    Utils.exec(`sass ${App.configDir}/scss/main.scss ${COMPILED_STYLE_DIR}/style.css`);
+    App.resetCss();
+    App.applyCss(`${COMPILED_STYLE_DIR}/style.css`);
+    console.log('[LOG] Styles loaded')
+}
+applyStyle().catch(print);
 
 const Windows = () => [
     // forMonitors(DesktopBackground),
-    forMonitors(Crosshair),
+
     Overview(),
     forMonitors(Indicator),
     forMonitors(Cheatsheet),
@@ -58,6 +63,7 @@ const Windows = () => [
     forMonitors((id) => Corner(id, 'bottom right', userOptions.appearance.fakeScreenRounding)),
     forMonitors(BarCornerTopleft),
     forMonitors(BarCornerTopright),
+    forMonitors(Click2Close),
 ];
 
 const CLOSE_ANIM_TIME = 210; // Longer than actual anim time to make sure widgets animate fully

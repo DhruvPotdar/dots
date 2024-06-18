@@ -5,20 +5,25 @@ import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { TabContainer } from '../.commonwidgets/tabcontainer.js';
 import Todo from "../../services/todo.js";
 import { setupCursorHover } from '../.widgetutils/cursorhover.js';
+import { NavigationIndicator } from '../.commonwidgets/cairo_navigationindicator.js';
 
-const TodoListItem = (task, id, isDone, isEven = false) => {
-    const taskName = Widget.Label({
-        hexpand: true,
-        xalign: 0,
-        wrap: true,
-        className: 'txt txt-small sidebar-todo-txt',
-        label: task.content,
-        selectable: true,
+const defaultTodoSelected = 'undone';
+
+const todoListItem = (task, id, isDone, isEven = false) => {
+    const crosser = Widget.Box({
+        className: 'sidebar-todo-crosser',
     });
-    const actions = Box({
-        hpack: 'end',
-        className: 'spacing-h-5 sidebar-todo-actions',
+    const todoContent = Widget.Box({
+        className: 'sidebar-todo-item spacing-h-5',
         children: [
+            Widget.Label({
+                hexpand: true,
+                xalign: 0,
+                wrap: true,
+                className: 'txt txt-small sidebar-todo-txt',
+                label: task.content,
+                selectable: true,
+            }),
             Widget.Button({ // Check/Uncheck
                 vpack: 'center',
                 className: 'txt sidebar-todo-item-action',
@@ -56,21 +61,6 @@ const TodoListItem = (task, id, isDone, isEven = false) => {
                 },
                 setup: setupCursorHover,
             }),
-        ]
-    })
-    const crosser = Widget.Box({
-        className: 'sidebar-todo-crosser',
-    });
-    const todoContent = Widget.Box({
-        className: 'sidebar-todo-item spacing-h-5',
-        children: [
-            Widget.Box({
-                vertical: true,
-                children: [
-                    taskName,
-                    actions,
-                ]
-            }),
             crosser,
         ]
     });
@@ -80,10 +70,7 @@ const TodoListItem = (task, id, isDone, isEven = false) => {
         transitionDuration: userOptions.animations.durationLarge,
         child: todoContent,
     })
-    return Box({
-        homogeneous: true,
-        children: [widgetRevealer]
-    });
+    return widgetRevealer;
 }
 
 const todoItems = (isDone) => Widget.Scrollable({
@@ -91,12 +78,11 @@ const todoItems = (isDone) => Widget.Scrollable({
     vscroll: 'automatic',
     child: Widget.Box({
         vertical: true,
-        className: 'spacing-v-5',
         setup: (self) => self
             .hook(Todo, (self) => {
                 self.children = Todo.todo_json.map((task, i) => {
                     if (task.done != isDone) return null;
-                    return TodoListItem(task, i, isDone);
+                    return todoListItem(task, i, isDone);
                 })
                 if (self.children.length == 0) {
                     self.homogeneous = true;
@@ -105,7 +91,7 @@ const todoItems = (isDone) => Widget.Scrollable({
                             hexpand: true,
                             vertical: true,
                             vpack: 'center',
-                            className: 'txt txt-subtext',
+                            className: 'txt',
                             children: [
                                 MaterialIcon(`${isDone ? 'checklist' : 'check_circle'}`, 'gigantic'),
                                 Label({ label: `${isDone ? 'Finished tasks will go here' : 'Nothing here!'}` })

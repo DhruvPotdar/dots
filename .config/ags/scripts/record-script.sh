@@ -10,8 +10,7 @@ getactivemonitor() {
     hyprctl monitors -j | gojq -r '.[] | select(.focused == true) | .name'
 }
 
-mkdir -p "$(xdg-user-dir VIDEOS)"
-cd "$(xdg-user-dir VIDEOS)" || exit
+cd ~/Videos || exit
 if pgrep wf-recorder > /dev/null; then
     notify-send "Recording Stopped" "Stopped" -a 'record-script.sh' &
     pkill wf-recorder &

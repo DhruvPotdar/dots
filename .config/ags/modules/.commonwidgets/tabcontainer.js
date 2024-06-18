@@ -35,6 +35,7 @@ export const TabContainer = ({ icons, names, children, className = '', setup = (
         }),
     });
     const tabIndicatorLine = Box({
+        hexpand: true,
         vertical: true,
         homogeneous: true,
         setup: (self) => self.hook(shownIndex, (self) => {
@@ -53,6 +54,7 @@ export const TabContainer = ({ icons, names, children, className = '', setup = (
             onScrollDown: () => mainBox.nextTab(),
             child: Box({
                 vertical: true,
+                hexpand: true,
                 children: [
                     tabs,
                     tabIndicatorLine

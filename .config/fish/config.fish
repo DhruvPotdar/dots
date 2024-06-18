@@ -79,17 +79,17 @@ zoxide init fish | source
 
 
 # =============== ROS Stuff ===============
-if test "$HOSTNAME" = "ros.radtop"
-    # Replace 'your_command' with the command you want to execute
+if test "$HOSTNAME" = "radtop"
     # ROS
     source /opt/ros/noetic/share/rosbash/rosfish
     bass source /opt/ros/noetic/setup.bash
-    bass source ~/catkin_ws/devel/setup.bash
-    set -x ROS_MASTER_URI 'http://ros.radtop:11311'
-    set -x ROS_HOSTNAME 'ros.radtop'
+    bass source ~/wheelchair_ws/devel/setup.bash
+    set -x ROS_MASTER_URI 'http://radtop:11311'
+    set -x ROS_HOSTNAME 'radtop'
     set -x CATKIN_SHELL bash
     set -x TURTLEBOT3_MODEL "waffle"
-    
+    ulimit -Sn 1024
+    ulimit -Hn 524288
     alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
     set PATH $PATH /opt/nvim-linux64/bin
 else

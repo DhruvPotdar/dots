@@ -71,3 +71,26 @@
 2024-05-28 11:56:52 Success.
 2024-05-28 11:56:52 Latest version is 1.5.12
 2024-05-28 11:56:52 App is up to date.
+2024-06-08 10:54:31 Loading main app package /usr/lib/obsidian/obsidian.asar
+2024-06-08 10:54:31 Checking for update using Github
+2024-06-08 10:54:32 Success.
+2024-06-08 10:54:32 Latest version is 1.6.2
+2024-06-08 10:54:32 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.6.2/obsidian-1.6.2.asar.gz
+2024-06-08 10:54:37 Verifying hash & signature. Size= 8794467
+2024-06-08 10:54:37 Saving file
+2024-06-08 10:54:37 Update complete.
+2024-06-08 10:55:00 Loading updated app package /home/radtop/.config/obsidian/obsidian-1.6.2.asar
+2024-06-08 10:55:00 Checking for update using Github
+2024-06-08 10:55:00 Success.
+2024-06-08 10:55:00 Latest version is 1.6.2
+2024-06-08 10:55:00 App is up to date.
+2024-06-08 10:56:23 Loading updated app package /home/radtop/.config/obsidian/obsidian-1.6.2.asar
+2024-06-08 10:56:23 Checking for update using Github
+2024-06-08 10:56:24 Success.
+2024-06-08 10:56:24 Latest version is 1.6.2
+2024-06-08 10:56:24 App is up to date.
+2024-06-08 10:57:40 Loading updated app package /home/radtop/.config/obsidian/obsidian-1.6.2.asar
+2024-06-08 10:57:40 Checking for update using Github
+2024-06-08 10:57:40 Success.
+2024-06-08 10:57:40 Latest version is 1.6.2
+2024-06-08 10:57:40 App is up to date.

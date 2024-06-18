@@ -167,16 +167,7 @@ export default (props) => {
                 child: Box({
                     attribute: {
                         'updateNetworks': (self) => {
-                            const accessPoints = Network.wifi?.access_points || [];
-                            self.children = Object.values(accessPoints.reduce((a, accessPoint) => {
-                                // Only keep max strength networks by ssid
-                                if (!a[accessPoint.ssid] || a[accessPoint.ssid].strength < accessPoint.strength) {
-                                    a[accessPoint.ssid] = accessPoint;
-                                    a[accessPoint.ssid].active |= accessPoint.active;
-                                }
-
-                                return a;
-                            }, {})).map(n => WifiNetwork(n));
+                            self.children = Network.wifi?.access_points?.map(n => WifiNetwork(n));
                         },
                     },
                     vertical: true,

@@ -19,12 +19,31 @@ const USER_CACHE_DIR = GLib.get_user_cache_dir();
 Utils.exec(`bash -c 'mkdir -p ${USER_CACHE_DIR}/ags/media/waifus'`);
 Utils.exec(`bash -c 'rm ${USER_CACHE_DIR}/ags/media/waifus/*'`);
 
-const TagButton = (command) => Button({
-    className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
-    onClicked: () => { chatEntry.buffer.text += `${command} ` },
-    setup: setupCursorHover,
-    label: command,
-});
+const TagButton = (command) => {
+    const plusSign = Revealer({
+        transition: 'slide_right',
+        revealChild: false,
+        className: 'margin-right-5',
+        child: Label({
+            label: '+',
+        })
+    });
+    return Button({
+        className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
+        onClicked: () => { chatEntry.buffer.text += `${command} ` },
+        onHover: () => plusSign.revealChild = true,
+        onHoverLost: () => plusSign.revealChild = false,
+        setup: setupCursorHover,
+        child: Box({
+            children: [
+                plusSign,
+                Label({
+                    label: command,
+                }),
+            ]
+        })
+    });
+}
 
 const CommandButton = (command, displayName = command) => Button({
     className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
@@ -98,9 +117,7 @@ export const BooruSettings = () => MarginRevealer({
                         name: 'Lewds',
                         desc: `Shows naughty stuff when enabled.\nYa like those? Add this to user_options.js:
 'sidebar': {
-  'image': {
-    'allowNsfw': true,
-  }
+  'imageAllowNsfw': true,
 },`,
                         initValue: BooruService.nsfw,
                         onChange: (self, newValue) => {
@@ -314,7 +331,7 @@ const BooruPage = (taglist, serviceName = 'Booru') => {
                     downloadState.shown = 'error';
                     return;
                 }
-                const imageColumns = userOptions.sidebar.image.columns;
+                const imageColumns = userOptions.sidebar.imageColumns;
                 const imageRows = data.length / imageColumns;
 
                 // Init cols

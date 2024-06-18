@@ -8,45 +8,13 @@ export function fileExists(filePath) {
 }
 
 const FIRST_RUN_FILE = "firstrun.txt";
-const FIRST_RUN_PATH = `${GLib.get_user_state_dir()}/ags/user/${FIRST_RUN_FILE}`;
+const FIRST_RUN_PATH = GLib.build_filenamev([GLib.get_user_cache_dir(), "ags", "user", FIRST_RUN_FILE]);
 const FIRST_RUN_FILE_CONTENT = "Just a file to confirm that you have been greeted ;)";
 const APP_NAME = "illogical-impulse";
 const FIRST_RUN_NOTIF_TITLE = "Welcome!";
 const FIRST_RUN_NOTIF_BODY = `First run? 👀 <span foreground="#FF0202" font_weight="bold">CTRL+SUPER+T</span> to pick a wallpaper (or styles will break!)\nFor a list of keybinds, hit <span foreground="#c06af1" font_weight="bold">Super + /</span>.`;
 
-var batteryWarned = false;
-async function batteryMessage() {
-    const perc = Battery.percent;
-    const charging = Battery.charging;
-    if (charging) {
-        batteryWarned = false;
-        return;
-    }
-    for (let i = userOptions.battery.warnLevels.length - 1; i >= 0; i--) {
-        if (perc <= userOptions.battery.warnLevels[i] && !charging && !batteryWarned) {
-            batteryWarned = true;
-            Utils.execAsync(['bash', '-c',
-                `notify-send "${userOptions.battery.warnTitles[i]}" "${userOptions.battery.warnMessages[i]}" -u critical -a '${APP_NAME}' -t 69420 &`
-            ]).catch(print);
-            break;
-        }
-    }
-    if (perc <= userOptions.battery.suspendThreshold) {
-        Utils.execAsync(['bash', '-c',
-            `notify-send "Suspending system" "Critical battery level (${perc}% remaining)" -u critical -a '${APP_NAME}' -t 69420 &`
-        ]).catch(print);
-        Utils.execAsync('systemctl suspend').catch(print);
-    }
-}
-
-export async function startBatteryWarningService() {
-    Utils.timeout(1, () => {
-        Battery.connect('changed', () => batteryMessage().catch(print));
-    })
-}
-
 export async function firstRunWelcome() {
-    GLib.mkdir_with_parents(`${GLib.get_user_state_dir()}/ags/user`, 755);
     if (!fileExists(FIRST_RUN_PATH)) {
         Utils.writeFile(FIRST_RUN_FILE_CONTENT, FIRST_RUN_PATH)
             .then(() => {
@@ -59,3 +27,28 @@ export async function firstRunWelcome() {
             .catch(print);
     }
 }
+
+var batteryWarned = false;
+async function batteryMessage() {
+    const perc = Battery.percent;
+    const charging = Battery.charging;
+    if(charging) {
+        batteryWarned = false;
+        return;
+    }
+    for (let i = userOptions.battery.warnLevels.length - 1; i >= 0; i--) {
+        if (perc <= userOptions.battery.warnLevels[i] && !charging && !batteryWarned) {
+            batteryWarned = true;
+            Utils.execAsync(['bash', '-c',
+                `notify-send "${userOptions.battery.warnTitles[i]}" "${userOptions.battery.warnMessages[i]}" -u critical -a '${APP_NAME}' -t 69420 &`
+            ]).catch(print);
+            break;
+        }
+    }
+}
+
+// Run them
+firstRunWelcome();
+Utils.timeout(1, () => {
+    Battery.connect('changed', () => batteryMessage().catch(print));
+})

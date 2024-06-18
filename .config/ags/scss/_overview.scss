@@ -85,11 +85,11 @@
 
 .overview-search-result-btn:hover,
 .overview-search-result-btn:focus {
-    background-color: $layer2;
+    background-color: $hovercolor;
 }
 
 .overview-search-result-btn:active {
-    background-color: $layer2Hover;
+    background-color: $activecolor;
 }
 
 .overview-tasks {

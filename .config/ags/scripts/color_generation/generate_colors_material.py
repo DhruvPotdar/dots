@@ -99,10 +99,8 @@ elif args.scheme == 'fidelity':
     from materialyoucolor.scheme.scheme_fidelity import SchemeFidelity as Scheme
 elif args.scheme == 'content':
     from materialyoucolor.scheme.scheme_content import SchemeContent as Scheme
-elif args.scheme == 'vibrant':
-    from materialyoucolor.scheme.scheme_vibrant import SchemeVibrant as Scheme
 else:
-    from schemes.scheme_morevibrant import SchemeMoreVibrant as Scheme
+    from materialyoucolor.scheme.scheme_vibrant import SchemeVibrant as Scheme
 
 # Generate
 scheme = Scheme(hct, darkmode, 0.0)
