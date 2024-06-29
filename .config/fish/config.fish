@@ -83,7 +83,7 @@ if test "$HOSTNAME" = "radtop"
     # ROS
     source /opt/ros/noetic/share/rosbash/rosfish
     bass source /opt/ros/noetic/setup.bash
-    bass source ~/wheelchair_ws/devel/setup.bash
+    # bass source ~/wheelchair_ws/devel/setup.bash
     set -x ROS_MASTER_URI 'http://radtop:11311'
     set -x ROS_HOSTNAME 'radtop'
     set -x CATKIN_SHELL bash
