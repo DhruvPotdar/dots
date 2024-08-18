@@ -12,7 +12,6 @@ end
 alias ls 'eza  --icons' 
 alias ll 'eza  -la --icons' 
 # alias bat 'batcat'
-alias cat 'bat'
 alias fconf 'code ~/.config/fish/'
 alias cls 'clear'
 alias tmux "tmux -u"
@@ -80,20 +79,23 @@ zoxide init fish | source
 
 # =============== ROS Stuff ===============
 if test "$HOSTNAME" = "radtop"
-    # ROS
-    source /opt/ros/noetic/share/rosbash/rosfish
-    bass source /opt/ros/noetic/setup.bash
-    # bass source ~/wheelchair_ws/devel/setup.bash
-    set -x ROS_MASTER_URI 'http://radtop:11311'
-    set -x ROS_HOSTNAME 'radtop'
-    set -x CATKIN_SHELL bash
-    set -x TURTLEBOT3_MODEL "waffle"
-    ulimit -Sn 1024
-    ulimit -Hn 524288
-    alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
-    set PATH $PATH /opt/nvim-linux64/bin
+  # ROS
+  source /opt/ros/noetic/share/rosbash/rosfish
+  bass source /opt/ros/noetic/setup.bash
+  # bass source ~/wheelchair_ws/devel/setup.bash
+  set -x ROS_MASTER_URI 'http://radtop:11311'
+  set -x ROS_HOSTNAME 'radtop'
+  set -x CATKIN_SHELL bash
+  set -x TURTLEBOT3_MODEL "waffle"
+  ulimit -Sn 1024
+  ulimit -Hn 524288
+  alias cat 'batcat'
+  alias bat 'batcat'
+  alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
+  set PATH $PATH /opt/nvim-linux64/bin
 else
-    enable_transience
+  alias cat 'bat'
+  enable_transience
 end
 
 #  ============== COLORS =================
@@ -135,3 +137,4 @@ end
 # set -U fish_pager_color_secondary_completion
 
 printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish" }}\x9c'
+export GAZEBO_MODEL_PATH=/home/radtop/icra_ws/src/husky_ur3_simulator/models

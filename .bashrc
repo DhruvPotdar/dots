@@ -15,8 +15,9 @@ eval "$(atuin init bash)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-if [[ "$(lsb_release -rs)" == "20.04" ]] && [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
-	# Replace this with the command you want to execute
-#	fish 
-fi
+# if [[ "$(lsb_release -rs)" == "20.04" ]] && [[ "$(lsb_release -is)" == "Ubuntu" ]]; then
+# 	# Replace this with the command you want to execute
+# #	fish 
+# :
+# fi
 
