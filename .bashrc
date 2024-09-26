@@ -21,3 +21,4 @@ eval "$(atuin init bash)"
 # :
 # fi
 
+
