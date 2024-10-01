@@ -7,14 +7,11 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
-  -- add ayu
-  { "yorumicolors/yorumi.nvim" },
-
   -- Configure LazyVim to load gruvbox
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "yorumi",
+       colorscheme = "yorumi",
     },
   },
 

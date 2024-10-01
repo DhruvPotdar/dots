@@ -78,7 +78,7 @@ zoxide init fish | source
 
 
 # =============== ROS Stuff ===============
-if test "$HOSTNAME" = "radtop"
+if test "$ROS_DISTRO" = "noetic"
   # ROS
   source /opt/ros/noetic/share/rosbash/rosfish
   bass source /opt/ros/noetic/setup.bash
@@ -93,6 +93,22 @@ if test "$HOSTNAME" = "radtop"
   alias bat 'batcat'
   alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
   set PATH $PATH /opt/nvim-linux64/bin
+else if test "$ROS_DISTRO" = "humble"
+  # ROS
+  # bass source /opt/ros/humble/share/rosbash/rosfish
+  bass source /opt/ros/humble/setup.bash
+  # bass source ~/wheelchair_ws/devel/setup.bash
+  set -x ROS_MASTER_URI 'http://radtop:11311'
+  set -x ROS_DOMAIN_ID '69'
+  set -x ROS_LOCALHOST_ONLY 1
+  set -x ROS_HOSTNAME 'radtop'
+  # set -x CATKIN_SHELL bash
+  set -x TURTLEBOT3_MODEL "waffle"
+  ulimit -Sn 1024
+  ulimit -Hn 524288
+  export _colcon_cd_root=/opt/ros/humble/
+
+
 else
   alias cat 'bat'
   enable_transience
