@@ -71,7 +71,7 @@
         "format": "{:%I:%M %p}",
         "rotate": 0,
         "format-alt": "{:%R 󰃭 %d·%m·%y}",
-        "tooltip-format": "<tt>{calendar}</tt>",
+        "tooltip-format": "<span>{calendar}</span>",
         "calendar": {
             "mode": "month",
             "mode-mon-col": 3,
@@ -119,7 +119,7 @@
             "(.*)Spotify": "Spotify 󰓇",
             "(.*)Steam": "Steam 󰓓"
         },
-        "max-length": 1000
+        "max-length": 50
     },
 
     "backlight": {
@@ -141,43 +141,44 @@
         "format-linked": "󰈀 {ifname} (No IP)",
         "format-disconnected": "󰖪 ",
         "tooltip-format-disconnected": "Disconnected",
-        "format-alt": "<span foreground='#85c7b8'> {bandwidthDownBytes}</span> <span foreground='#f3ab59'> {bandwidthUpBytes}</span>",
+        "format-alt": "<span foreground='#99ffdd'> {bandwidthDownBytes}</span> <span foreground='#ffcc66'> {bandwidthUpBytes}</span>",
         "interval": 2,
     },
 
-    "pulseaudio": {
-        "format": "{icon} {volume}",
-        "rotate": 0,
-        "format-muted": "婢",
-        "on-click": "pavucontrol -t 3",
-        "on-click-middle": "volumecontrol.sh -o m",
-        "on-scroll-up": "volumecontrol.sh -o i",
-        "on-scroll-down": "volumecontrol.sh -o d",
-        "tooltip-format": "{icon} {desc} // {volume}%",
-        "scroll-step": 5,
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        }
-    },
+"pulseaudio": {
+    "format": "{icon} {volume}",
+    "rotate": 0,
+    "format-muted": "婢",
+    "on-click": "pavucontrol -t 3",
+    "on-click-right": "volumecontrol.sh -s ''",
+    "on-click-middle": "volumecontrol.sh -o m",
+    "on-scroll-up": "volumecontrol.sh -o i",
+    "on-scroll-down": "volumecontrol.sh -o d",
+    "tooltip-format": "{icon} {desc} // {volume}%",
+    "scroll-step": 5,
+    "format-icons": {
+        "headphone": "",
+        "hands-free": "",
+        "headset": "",
+        "phone": "",
+        "portable": "",
+        "car": "",
+        "default": ["", "", ""]
+    }
+},
 
-    "pulseaudio#microphone": {
-        "format": "{format_source}",
-        "rotate": 0,
-        "format-source": "",
-        "format-source-muted": "",
-        "on-click": "pavucontrol -t 4",
-        "on-click-middle": "volumecontrol.sh -i m",
-        "on-scroll-up": "volumecontrol.sh -i i",
-        "on-scroll-down": "volumecontrol.sh -i d",
-        "tooltip-format": "{format_source} {source_desc} // {source_volume}%",
-        "scroll-step": 5
-    },
+"pulseaudio#microphone": {
+    "format": "{format_source}",
+    "rotate": 0,
+    "format-source": "",
+    "format-source-muted": "",
+    "on-click": "pavucontrol -t 4",
+    "on-click-middle": "volumecontrol.sh -i m",
+    "on-scroll-up": "volumecontrol.sh -i i",
+    "on-scroll-down": "volumecontrol.sh -i d",
+    "tooltip-format": "{format_source} {source_desc} // {source_volume}%",
+    "scroll-step": 5
+},
 
     "custom/updates": {
         "exec": "systemupdate.sh",
