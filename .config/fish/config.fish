@@ -107,8 +107,7 @@ else if test "$ROS_DISTRO" = "humble"
   ulimit -Sn 1024
   ulimit -Hn 524288
   export _colcon_cd_root=/opt/ros/humble/
-
-
+  set PATH $PATH /opt/nvim-linux64/bin
 else
   alias cat 'bat'
   enable_transience
