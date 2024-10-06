@@ -20,7 +20,7 @@ alias mux "tmuxinator"
 alias px4z " zellij action new-tab --layout ~/.config/zellij/layouts/px4.kdl"
 
 # Set Editor
-set -gx EDITOR code
+set -gx EDITOR nvim
 set fzf_preview_dir_cmd eza --all --color=always --icons
 set fzf_preview_file_cmd bat -nw
 
@@ -153,3 +153,7 @@ end
 
 printf '\eP$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "fish" }}\x9c'
 export GAZEBO_MODEL_PATH=/home/radtop/icra_ws/src/husky_ur3_simulator/models
+
+# bun
+set --export BUN_INSTALL "$HOME/.bun"
+set --export PATH $BUN_INSTALL/bin $PATH
