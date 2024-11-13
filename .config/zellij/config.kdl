@@ -244,7 +244,7 @@ auto_layout true
 themes {
     yorumi {
         fg "#a7a9b5"
-        bg "#060914"
+        bg "#878996"
         red "#ff3535"
         green "#a188c3"
         yellow "#d6b476"

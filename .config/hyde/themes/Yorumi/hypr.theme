@@ -1,12 +1,16 @@
 $HOME/.config/hypr/themes/theme.conf|> $HOME/.config/hypr/themes/colors.conf
 exec = gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-dracula'
-exec = gsettings set org.gnome.desktop.interface gtk-theme 'Dracula'
+# exec = gsettings set org.gnome.desktop.interface gtk-theme 'Dracula'
 exec = gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 
-exec = hyprctl setcursor Dracula-cursors 25
-exec = gsettings set org.gnome.desktop.interface cursor-theme 'Dracula-cursors'
-exec = gsettings set org.gnome.desktop.interface cursor-size 20
+exec = hyprctl setcursor Catppucccin-Mocha-Dark 20
+# exec = gsettings set org.gnome.desktop.interface cursor-theme 'Catpuccin-Mocha-Dark'
+exec = gsettings set org.gnome.desktop.interface cursor-size 24
 
+env = HYPRCURSOR_THEME,rose-pine-hyprcursor
+env = HYPRCURSOR_SIZE,24
+# env = XCURSOR_THEME,Catpuccin-mocha-dark-cursors
+env = XCURSOR_SIZE,24
 
 general {
     gaps_in = 3
@@ -27,8 +31,6 @@ group {
 
 decoration {
     rounding = 5
-    drop_shadow = true
-
     blur {
         enabled = yes
         size = 5

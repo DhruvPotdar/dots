@@ -106,6 +106,7 @@ else if test "$ROS_DISTRO" = "humble"
   set -x TURTLEBOT3_MODEL "waffle"
   ulimit -Sn 1024
   ulimit -Hn 524288
+  bass source /usr/share/colcon_cd/function/colcon_cd.sh
   export _colcon_cd_root=/opt/ros/humble/
   set PATH $PATH /opt/nvim-linux64/bin
 else
