@@ -43,25 +43,25 @@ set PATH $PATH $HOME/.cargo/bin $HOME/.local/bin $HOME/bin $HOME/.config/emacs/b
 set -x PAGER bat
 
 #  <<< FZF >>>
-export FZF_CTRL_T_OPTS="
-  --preview 'batcat -n --color=always {}'
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
-export FZF_DEFAULT_OPTS=' --border double'
-export FZF_CTRL_R_OPTS="
-  --preview 'echo {}' --preview-window up:3:hidden:wrap
-  --bind 'ctrl-/:toggle-preview'
-  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
-  --color header:italic
-  --border double
-  "
-export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
-
-export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
- --color=fg:-1,bg:-1,hl:#5f87af
- --color=fg+:#d0d0d0,bg+:#262626,hl+:#5fd7ff
- --color=info:#ff9305,prompt:#d60088,pointer:#af5fff
- --color=marker:#87ff00,spinner:#af5fff,header:#87afaf'
-
+# export FZF_CTRL_T_OPTS="
+#   --preview 'batcat -n --color=always {}'
+#   --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+# export FZF_DEFAULT_OPTS=' --border double'
+# export FZF_CTRL_R_OPTS="
+#   --preview 'echo {}' --preview-window up:3:hidden:wrap
+#   --bind 'ctrl-/:toggle-preview'
+#   --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+#   --color header:italic
+#   --border double
+#   "
+# export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
+#
+# export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+#  --color=fg:-1,bg:-1,hl:#5f87af
+#  --color=fg+:#d0d0d0,bg+:#262626,hl+:#5fd7ff
+#  --color=info:#ff9305,prompt:#d60088,pointer:#af5fff
+#  --color=marker:#87ff00,spinner:#af5fff,header:#87afaf'
+#
 # bind \e\[A fzf-history-widget
 # <<< FZF >>> 
 

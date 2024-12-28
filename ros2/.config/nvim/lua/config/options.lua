@@ -13,3 +13,11 @@ vim.opt.mouse = "a"
 
 -- Enable word wrap
 vim.opt.wrap = true
+
+-- Change lualine height
+vim.o.cmdheight = 0
+
+-- Set completeopt to have a better completion experience
+vim.opt.completeopt = "menuone,noselect"
+vim.opt.swapfile = false
+vim.opt.foldmethod = "expr"
