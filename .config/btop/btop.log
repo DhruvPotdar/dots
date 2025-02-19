@@ -210,3 +210,10 @@ Use --utf-force argument to force start if you're sure your terminal can handle 
 
 2024/10/25 (14:09:08) | ===> btop++ v.1.4.0
 2024/10/25 (14:09:08) | ERROR: Couldn't determine terminal size of "STDOUT_FILENO"!
+
+2025/01/15 (15:58:05) | ===> btop++ v.1.4.0
+2025/01/15 (15:58:05) | ERROR: Couldn't determine terminal size of "STDOUT_FILENO"!
+2025/01/15 (15:58:05) | ERROR: Couldn't determine terminal size of "/dev/tty"!
+
+2025/02/03 (23:03:44) | ===> btop++ v.1.4.0
+2025/02/03 (23:03:44) | WARNING: Failed to join _runner thread on exit!

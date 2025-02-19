@@ -44,7 +44,7 @@ layout {
 
         hide_frame_for_single_pane "true"
 
-				mode_normal        "#[fg=$red,bold] NORMAL"
+				mode_normal        "#[fg=$red,bold] ☼"
 				mode_tmux          "#[fg=$green,bold] "
 				mode_locked        "#[fg=$yellow,bold] 󰣇"
 				mode_pane          "#[fg=$aqua,bold] "
@@ -59,11 +59,11 @@ layout {
 				mode_session       "#[fg=$purple,bold] 󰆾"
 				mode_prompt        "#[fg=$purple,bold] "
 
-				tab_normal              "#[fg=$fg4,bold] {name} {floating_indicator}"
-				tab_normal_fullscreen   "#[fg=$fg1,bold] {name} {fullscreen_indicator}"
-				tab_normal_sync         "#[fg=$fg1,bold] {name} {sync_indicator}"
-				tab_active              "#[fg=$fg2,bold,underscore]{name}{floating_indicator}"
-				tab_active_fullscreen   "#[fg=$bg2,bold,underscore]{name}{fullscreen_indicator}"
+				tab_normal              "#[fg=$fg4] {name} {floating_indicator}"
+				tab_normal_fullscreen   "#[fg=$fg4] {name} {fullscreen_indicator}"
+				tab_normal_sync         "#[fg=$fg4] {name} {sync_indicator}"
+				tab_active              "#[fg=$fg2,bold] {name} {floating_indicator}"
+				tab_active_fullscreen   "#[fg=$bg2,bold] {name} {fullscreen_indicator}"
 				tab_active_sync         "#[fg=$bg2,bold] {name} {sync_indicator}"
 				tab_separator           "#[fg=$fg1]"
 
@@ -78,10 +78,10 @@ layout {
 
         datetime          "{format}"
         datetime_format   "%Y-%m-%d | %H:%M"
-        datetime_timezone "Mumbai/India"
+        datetime_timezone "Asia/Kolkata"
 
 	}
 }
 		children
-}
+		}
 }

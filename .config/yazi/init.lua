@@ -1,7 +1,6 @@
 -- function Manager:render(area)
 -- 	local chunks = self:layout(area)
 
-
 -- 	local bar = function(c, x, y)
 -- 			x, y = math.max(0, x), math.max(0, y)
 -- 			return ui.Bar(ui.Rect { x = x, y = y, w = ya.clamp(0, area.w - x, 1), h = math.min(1, area.h) }, ui.Bar.TOP)
@@ -17,7 +16,7 @@
 -- 		bar("┴", chunks[1].right - 1, chunks[1].bottom - 1),
 -- 		bar("┬", chunks[2].right, chunks[2].y),
 -- 		bar("┴", chunks[2].right, chunks[1].bottom - 1),
-		
+
 -- 		-- Parent
 -- 		Parent:render(chunks[1]:padding(ui.Padding.xy(1))),
 -- 		-- Current
@@ -27,10 +26,7 @@
 -- 	}
 -- end
 
-require("full-border"):setup{
-	type = ui.Border.ROUNDED,
-}
-
+-- require("full-border"):setup()
 
 -- require("yatline"):setup({
 -- 	section_separator = { open = "", close = "" },

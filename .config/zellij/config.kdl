@@ -4,7 +4,8 @@ keybinds {
         // bind "Ctrl d" { Detach; }
         // bind "Ctrl q" { Quit; }
         bind "Alt n" { NewPane; }
-        bind "Alt f" { ToggleFloatingPanes; }
+				bind "Alt f" { ToggleFocusFullscreen; SwitchToMode "Locked"; }
+        bind "Alt e" { ToggleFloatingPanes; }
         bind "Alt h" "Alt Left" { MoveFocusOrTab "Left"; }
         bind "Alt l" "Alt Right" { MoveFocusOrTab "Right"; }
         bind "Alt j" "Alt Down" { MoveFocus "Down"; }
@@ -13,7 +14,7 @@ keybinds {
         bind "Alt -" { Resize "Decrease"; }
         bind "Alt [" { PreviousSwapLayout; }
         bind "Alt ]" { NextSwapLayout; }
-        bind "Alt c" { NewTab; }
+        bind "Alt t" { NewTab; }
         bind "Alt 1" { GoToTab 1; SwitchToMode "Normal"; }
         bind "Alt 2" { GoToTab 2; SwitchToMode "Normal"; }
         bind "Alt 3" { GoToTab 3; SwitchToMode "Normal"; }
@@ -238,7 +239,7 @@ plugins {
         welcome_screen false 
     }
     filepicker location="zellij:strider" {
-        cwd "/home/radtop/"
+        cwd "~"
     }
 }
 
@@ -248,7 +249,7 @@ plugins {
 //   - detach (Default)
 //   - quit
 //
-on_force_close "detach"
+on_force_close "quit"
 
 //  Send a request for a simplified ui (without arrow fonts) to plugins
 //  Options:
@@ -267,7 +268,7 @@ default_shell "fish"
 //   - true (default)
 //   - false
 //
-pane_frames false
+pane_frames true
 
 // Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
 // Options:
@@ -346,11 +347,11 @@ scrollback_editor "/usr/bin/vim"
 
 // The folder in which Zellij will look for layouts
 //
-layout_dir "/home/radtop/.config/zellij/layouts"
+layout_dir "/home/radtop/ros2/.config/zellij/layouts"
 
 // The folder in which Zellij will look for themes
 
-theme_dir "/home/radtop/.config/zellij/themes"
+theme_dir "/home/radtop/ros2/.config/zellij/themes"
 
 // Enable or disable the rendering of styled and colored underlines (undercurl).
 // May need to be disabled for certain unsupported terminals

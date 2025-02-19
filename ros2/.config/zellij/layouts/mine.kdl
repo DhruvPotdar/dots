@@ -42,7 +42,7 @@ layout {
         border_format   "#[fg=$bg1]{char}"
         border_position "top"
 
-        hide_frame_for_single_pane "false"
+        hide_frame_for_single_pane "true"
 
 				mode_normal        "#[fg=$red,bold] ☼"
 				mode_tmux          "#[fg=$green,bold] "
@@ -60,8 +60,8 @@ layout {
 				mode_prompt        "#[fg=$purple,bold] "
 
 				tab_normal              "#[fg=$fg4] {name} {floating_indicator}"
-				tab_normal_fullscreen   "#[fg=$fg1] {name} {fullscreen_indicator}"
-				tab_normal_sync         "#[fg=$fg1] {name} {sync_indicator}"
+				tab_normal_fullscreen   "#[fg=$fg4] {name} {fullscreen_indicator}"
+				tab_normal_sync         "#[fg=$fg4] {name} {sync_indicator}"
 				tab_active              "#[fg=$fg2,bold] {name} {floating_indicator}"
 				tab_active_fullscreen   "#[fg=$bg2,bold] {name} {fullscreen_indicator}"
 				tab_active_sync         "#[fg=$bg2,bold] {name} {sync_indicator}"
@@ -83,5 +83,5 @@ layout {
 	}
 }
 		children
-}
+		}
 }

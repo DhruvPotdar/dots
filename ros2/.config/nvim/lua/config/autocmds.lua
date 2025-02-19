@@ -24,10 +24,42 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
--- Automatically restart LSP after changin FQBN/Board
-vim.api.nvim_create_autocmd("User", {
-  pattern = "ArduinoFqbnReset",
+
+-- Keeps the statusline at the bottom at all times
+vim.api.nvim_create_autocmd("CursorHold", {
+  -- pattern = "*",
   callback = function()
-    vim.cmd("LspRestart")
+    if vim.o.cmdheight > 0 then
+      vim.o.cmdheight = 0
+    end
+  end,
+})
+
+-- lsp signs
+vim.api.nvim_create_autocmd({ "LspAttach" }, {
+  callback = function()
+    local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+    vim.diagnostic.config({
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = signs.Error,
+          [vim.diagnostic.severity.WARN] = signs.Warn,
+          [vim.diagnostic.severity.HINT] = signs.Hint,
+          [vim.diagnostic.severity.INFO] = signs.INFO,
+        },
+        texthl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
+        numhl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
+      },
+    })
   end,
 })

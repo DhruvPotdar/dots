@@ -20,6 +20,7 @@ vim.keymap.set("n", "<up>", '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set("n", "<down>", '<cmd>echo "Use j to move!!"<CR>')
 
 vim.keymap.set("n", "<leader>ya", ":%y+<CR>", { desc = "Yank all content in file" })
+vim.keymap.set("n", "<leader>va", "ggVG", { desc = "Visually Highlight all content in file" })
 
 -- Save as normal
 vim.keymap.set("n", "<C-s>", ":write<CR>", { desc = "Save file" })

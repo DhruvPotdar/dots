@@ -1,8 +1,8 @@
 [pyprland]
 plugins = [
-  "scratchpads",
-  "lost_windows",
-  "monitors",
+	"scratchpads",
+	"lost_windows",
+	# "monitors",
 ]
 
 

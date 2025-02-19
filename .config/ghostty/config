@@ -1,0 +1,24 @@
+
+palette = 0=#565b66
+palette = 1=#f47171
+palette = 2=#59c2ff
+palette = 3=#d6b476
+palette = 4=#8caaee
+palette = 5=#968ebe
+palette = 6=#85c7b8
+palette = 7=#cbced3
+palette = 8=#626975
+palette = 9=#f05c60
+palette = 10=#597bc0
+palette = 11=#ba9a5e
+palette = 12=#7b9ef0
+palette = 13=#b4647f
+palette = 14=#7aa8a7
+palette = 15=#d0d3d8
+background = 060914
+foreground = a7a9b5
+cursor-color = 39bae6
+background-opacity = 0.80
+font-family = Fira Code
+window-decoration = false
+confirm-close-surface = false
