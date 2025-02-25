@@ -6,7 +6,7 @@ end
 # Alias
 alias ls 'eza  --icons'
 alias ll 'eza  -la --icons'
-alias fconf 'code ~/.config/fish/'
+alias fconf 'nvim ~/.config/fish/'
 alias cls clear
 alias tmux "tmux -u"
 alias mux tmuxinator
@@ -22,7 +22,6 @@ set PATH $PATH $HOME/.cargo/bin $HOME/.local/bin $HOME/bin $HOME/.config/emacs/b
 
 set -x PAGER bat
 starship init fish | source
-
 zoxide init fish | source
 
 
@@ -37,6 +36,7 @@ else
 end
 # =============== ROS Stuff ===============
 if test "$ROS_DISTRO" = noetic
+
     # ROS
     source /opt/ros/noetic/share/rosbash/rosfish
     bass source /opt/ros/noetic/setup.bash
@@ -52,11 +52,17 @@ if test "$ROS_DISTRO" = noetic
     alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
     set PATH $PATH /opt/nvim-linux64/bin
 else if test "$ROS_DISTRO" = humble
+
     # ROS
     bass source /opt/ros/humble/setup.bash
     bass source $HOME/wheelchair_ws/install/setup.bash
     set -x ROS_MASTER_URI 'http://radtop:11311'
     set -x ROS_DOMAIN_ID 69
+
+    # Better Console Output
+    export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
+    export RCUTILS_COLORIZED_OUTPUT=1
+
     set -x ROS_LOCALHOST_ONLY 1
     set -x ROS_HOSTNAME radtop
     set -x TURTLEBOT3_MODEL waffle

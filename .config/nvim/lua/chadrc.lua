@@ -57,7 +57,7 @@ M.statusline = {
 -- lazyload it when there are 1+ buffers
 M.tabufline = {
   enabled = false,
-  lazyload = true,
+  lazyload = false,
   order = { "treeOffset", "buffers", "tabs", "btns", "theme_toggle" },
   modules = nil,
   bufwidth = 21,

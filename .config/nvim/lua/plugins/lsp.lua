@@ -122,6 +122,7 @@ return {
           },
           pyright = {
             python = {
+              disableOrganizeImports = true,
               analysis = {
                 autoSearchPaths = true,
                 diagnosticMode = "openFilesOnly",
@@ -144,6 +145,24 @@ return {
           -- ["*"] = function(server, opts) end,
         },
       }
+      -- Custom handler overrides for hover and signature help
+      vim.lsp.handlers["textDocument/hover"] = function(_, result, ctx, config)
+        if not (result and result.contents) then
+          return
+        end
+        config = config or {}
+        config.border = "rounded" -- Set the border style
+        vim.lsp.util.open_floating_preview(vim.lsp.util.convert_input_to_markdown_lines(result.contents), config)
+      end
+
+      vim.lsp.handlers["textDocument/signatureHelp"] = function(_, result, ctx, config)
+        if not (result and result.signatures and result.signatures[1]) then
+          return
+        end
+        config = config or {}
+        config.border = "rounded" -- Set the border style
+        vim.lsp.util.open_floating_preview(vim.lsp.util.convert_signature_help_to_markdown_lines(result), config)
+      end
       return ret
     end,
 
