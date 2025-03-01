@@ -60,7 +60,7 @@ else if test "$ROS_DISTRO" = humble
     set -x ROS_DOMAIN_ID 69
 
     # Better Console Output
-    export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
+    export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity}] [{time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
     export RCUTILS_COLORIZED_OUTPUT=1
 
     set -x ROS_LOCALHOST_ONLY 1

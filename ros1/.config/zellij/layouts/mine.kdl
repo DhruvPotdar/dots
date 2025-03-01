@@ -42,7 +42,7 @@ layout {
         border_format   "#[fg=$bg1]{char}"
         border_position "top"
 
-        hide_frame_for_single_pane "false"
+        hide_frame_for_single_pane "true"
 
 				mode_normal        "#[fg=$red,bold] ☼"
 				mode_tmux          "#[fg=$green,bold] "

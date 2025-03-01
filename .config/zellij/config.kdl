@@ -5,6 +5,9 @@ keybinds {
         // bind "Ctrl q" { Quit; }
         bind "Alt n" { NewPane; }
 				bind "Alt f" { ToggleFocusFullscreen; SwitchToMode "Locked"; }
+				bind "Alt i" { SwitchToMode "Scroll"; }
+				bind "Alt s" { EditScrollback; SwitchToMode "Locked"; }
+				bind "Alt q" { CloseFocus; SwitchToMode "Locked"; }
         bind "Alt e" { ToggleFloatingPanes; }
         bind "Alt h" "Alt Left" { MoveFocusOrTab "Left"; }
         bind "Alt l" "Alt Right" { MoveFocusOrTab "Right"; }
