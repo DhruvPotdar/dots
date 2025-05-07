@@ -1,75 +1,70 @@
 return {
 
   {
-    "saghen/blink.cmp",
-    enabled = false,
+    'saghen/blink.cmp',
+    event = 'InsertEnter',
     -- optional: provides snippets for the snippet source
-    dependencies = "rafamadriz/friendly-snippets",
+    dependencies = { 'rafamadriz/friendly-snippets' },
 
+    -- use a release tag to download pre-built binaries
+    version = '*',
+    -- AND/OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+    -- build = 'cargo build --release',
+    -- If you use nix, you can build from source using latest nightly rust with:
+    -- build = 'nix run .#build-plugin',
+
+    ---@module 'blink.cmp'
+    ---@type blink.cmp.Config
     opts = {
-      -- 'default' for mappings similar to built-in completion
-      -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
-      -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
-      -- See the full "keymap" documentation for information on defining your own keymap.
-      keymap = { preset = "enter" },
+      -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+      -- 'super-tab' for mappings similar to vscode (tab to accept)
+      -- 'enter' for enter to accept
+      -- 'none' for no mappings
+      --
+      -- All presets have the following mappings:
+      -- C-space: Open menu or open docs if already open
+      -- C-n/C-p or Up/Down: Select next/previous item
+      -- C-e: Hide menu
+      -- C-k: Toggle signature help (if signature.enabled = true)
+      --
+      -- See :h blink-cmp-config-keymap for defining your own keymap
+      keymap = { preset = 'enter' },
 
       appearance = {
-        -- Sets the fallback highlight groups to nvim-cmp's highlight groups
-        -- Useful for when your theme doesn't support blink.cmp
-        -- Will be removed in a future release
-        use_nvim_cmp_as_default = true,
-        -- Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
         -- Adjusts spacing to ensure icons are aligned
-        nerd_font_variant = "mono",
+        nerd_font_variant = 'mono',
       },
-
-      signature = { enabled = true, window = { border = "rounded" } },
+      -- Border
+      completion = {
+        menu = { border = 'rounded' },
+        documentation = { window = { border = 'single' }, auto_show = true },
+        ghost_text = { enabled = false },
+      },
+      signature = { window = { border = 'rounded' } },
       -- Default list of enabled providers defined so that you can extend it
       -- elsewhere in your config, without redefining it, due to `opts_extend`
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
-      },
-      completion = {
-        documentation = {
-          auto_show = true,
-          auto_show_delay_ms = 200,
-          window = {
-            border = "rounded",
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+
+        -- Disable completion in shell mode
+        providers = {
+          cmdline = {
+            -- ignores cmdline completions when executing shell commands
+            enabled = function()
+              return vim.fn.getcmdtype() ~= ':' or not vim.fn.getcmdline():match "^[%%0-9,'<>%-]*!"
+            end,
           },
         },
-        menu = {
-          enabled = true,
-          min_width = 15,
-          max_height = 10,
-          border = "rounded",
-          winblend = 0,
-          winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
-          -- Keep the cursor X lines away from the top/bottom of the window
-          scrolloff = 2,
-          -- Note that the gutter will be disabled when border ~= 'none'
-          scrollbar = false,
-          -- Which directions to show the window,
-          -- falling back to the next direction when there's not enough space
-          direction_priority = { "s", "n" },
-
-          -- Whether to automatically show the window when new completion items are available
-
-          auto_show = function(ctx)
-            return ctx.mode ~= "cmdline" or not vim.tbl_contains({ "/", "?" }, vim.fn.getcmdtype())
-          end,
-          -- Screen coordinates of the command line
-          cmdline_position = function()
-            if vim.g.ui_cmdline_pos ~= nil then
-              local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
-              return { pos[1] - 1, pos[2] }
-            end
-            local height = (vim.o.cmdheight == 0) and 1 or vim.o.cmdheight
-            return { vim.o.lines - height, 0 }
-          end,
-        },
       },
 
-      -- opts_extend = { "sources.default" },
+      -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
+      -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+      -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+      --
+      -- See the fuzzy documentation for more information
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
     },
+    opts_extend = { 'sources.default' },
   },
 }

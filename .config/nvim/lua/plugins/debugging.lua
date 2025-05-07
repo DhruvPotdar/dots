@@ -1,181 +1,127 @@
 return {
   {
-    "mfussenegger/nvim-dap", -- Enable debug adapters
+    'mfussenegger/nvim-dap',
+    event = 'VeryLazy',
+    recommended = true,
+    desc = 'Debugging support. Requires language specific adapters to be configured. (see lang extras)',
+
     dependencies = {
-      "mfussenegger/nvim-dap-python", -- Python debug adapter
-      "rcarriga/nvim-dap-ui", -- UI-like for debugging
-      "theHamsta/nvim-dap-virtual-text", -- Inline text during debugging
-      "nvim-neotest/nvim-nio", -- Needed by nvim-dap-ui
-      "folke/lazydev.nvim", -- Recommended by nvim-dap-ui
+      'rcarriga/nvim-dap-ui',
+      -- virtual text for the debugger
+      {
+        'theHamsta/nvim-dap-virtual-text',
+        opts = {},
+      },
     },
+
+  -- stylua: ignore
+  keys = {
+    { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, desc = "Breakpoint Condition" },
+    { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
+    { "<leader>dc", function() require("dap").continue() end, desc = "Run/Continue" },
+    { "<leader>da", function() require("dap").continue({ before = get_args }) end, desc = "Run with Args" },
+    { "<leader>dC", function() require("dap").run_to_cursor() end, desc = "Run to Cursor" },
+    { "<leader>dg", function() require("dap").goto_() end, desc = "Go to Line (No Execute)" },
+    { "<leader>di", function() require("dap").step_into() end, desc = "Step Into" },
+    { "<leader>dj", function() require("dap").down() end, desc = "Down" },
+    { "<leader>dk", function() require("dap").up() end, desc = "Up" },
+    { "<leader>dl", function() require("dap").run_last() end, desc = "Run Last" },
+    { "<leader>do", function() require("dap").step_out() end, desc = "Step Out" },
+    { "<leader>dO", function() require("dap").step_over() end, desc = "Step Over" },
+    { "<leader>dP", function() require("dap").pause() end, desc = "Pause" },
+    { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
+    { "<leader>ds", function() require("dap").session() end, desc = "Session" },
+    { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
+    { "<leader>dw", function() require("dap.ui.widgets").hover() end, desc = "Widgets" },
+  },
+
     config = function()
-      -- require("lazydev").setup({
-      --   library = { plugins = { "nvim-dap-ui" }, types = true },
-      -- })
-      -- PERF:
-      -- ===================================================
-      -- UI related configurations
-      -- ====================================================
-      local dap = require("dap")
-      local sign = vim.fn.sign_define
+      -- load mason-nvim-dap here, after all adapters have been setup
+      require('mason-nvim-dap').setup()
 
-      sign("DapBreakpoint", { text = " ", texthl = "DapBreakpoint", linehl = "", numhl = "" })
-      sign("DapBreakpointCondition", { text = " ", texthl = "DapBreakpointCondition", linehl = "", numhl = "" })
-      sign("DapLogPoint", { text = "◆ ", texthl = "DapLogPoint", linehl = "", numhl = "" })
-      sign("DapStoppedLine", { text = "󰁕 ", texthl = "DapLogPoint", linehl = "", numhl = "" })
-      sign("DapBreakpointRejected", { text = " ", texthl = "DapBreakpointRejected", linehl = "", numhl = "" })
+      vim.api.nvim_set_hl(0, 'DapStoppedLine', { default = true, link = 'Visual' })
 
-      -- PERF:
-      -- ===================================================
-      -- Adapters
-      -- ====================================================
-      dap.adapters.codelldb = {
-        type = "server",
-        port = "${port}",
-        executable = {
-          command = vim.fn.expand("$HOME/.local/share/nvim/mason/bin/codelldb"),
-          args = { "--port", "${port}" },
-        },
+      -- Define your DAP icons
+      local dap_icons = {
+        Breakpoint = '●',
+        BreakpointCondition = '◆',
+        BreakpointRejected = '',
+        LogPoint = '◆',
+        Stopped = '',
       }
-      -- PERF:
-      -- ===================================================
-      -- Configurations
-      -- ====================================================
-      dap.configurations.cpp = {
-        {
-          name = "C++: Run file",
-          type = "codelldb",
-          request = "launch",
-          program = function()
-            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-          end,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = false,
-        },
-        {
-          -- If you get an "Operation not permitted" error using this, try disabling YAMA:
-          --  echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-          name = "C++: Attach to process",
-          type = "codelldb", -- Adjust this to match your adapter name (`dap.adapters.<name>`)
-          request = "attach",
-          pid = require("dap.utils").pick_process,
-          args = {},
-        },
-        {
-          name = "C++: ROS Node",
-          type = "codelldb",
-          request = "launch",
-          -- Might need to consider using vim.ui.input
-          program = function()
-            local pkgName = vim.fn.input("ROS Package: ", "")
-            return vim.fn.input(
-              "Path to executable: ",
-              vim.fn.getcwd() .. "/install/" .. pkgName .. "/lib/" .. pkgName .. "/",
-              "file"
-            )
-          end,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = false,
-        },
-      }
-      -- PERF:
-      -- ====================================================
-      -- Extensions configurations
-      -- ====================================================
-      require("dapui").setup({
-        controls = {
-          icons = {
-            pause = "⏸ ",
-            play = "▶ ",
-            terminate = "⏹ ",
-          },
-        },
-        floating = {
-          border = "rounded",
-        },
-        layouts = {
-          {
-            elements = {
-              { id = "stacks", size = 0.30 },
-              { id = "breakpoints", size = 0.20 },
-              { id = "scopes", size = 0.50 },
-            },
-            position = "left",
-            size = 40,
-          },
-          {
-            elements = {
-              { id = "console", size = 0.50 },
-              { id = "repl", size = 0.50 },
-            },
-            position = "bottom",
-            size = 10,
-          },
-        },
-      })
-      require("nvim-dap-virtual-text").setup()
-      require("dap-python").setup()
-      table.insert(require("dap").configurations.python, {
-        type = "python",
-        request = "launch",
-        name = "Python: ROS2 lauch test",
-        program = "/opt/ros/humble/bin/launch_test",
-        args = { "${file}" },
-      })
 
-      require("dap-python").test_runner = "pytest"
+      -- If you want to add highlight groups or other options, use a table:
+      -- local dap_icons = {
+      --   Breakpoint = { "●", "DiagnosticInfo" },
+      --   BreakpointCondition = { "◆", "DiagnosticHint" },
+      --   BreakpointRejected = { "", "DiagnosticError" },
+      --   LogPoint = { "◆", "DiagnosticHint" },
+      --   Stopped = { "", "DiagnosticWarn" },
+      -- }
 
-      -- PERF:
-      -- ====================================================
-      -- Custom User Commands for Dap
-      -- ====================================================
-      vim.api.nvim_create_user_command("DapUIToggle", ":lua require('dapui').toggle()", {})
-      vim.api.nvim_create_user_command("DapPytestMethod", ":lua require('dap-python').test_method()", {})
-
-      vim.api.nvim_create_user_command(
-        "DapResetUI",
-        ":lua require('dapui').open({reset = true})",
-        { desc = "Reset DAP UI Layout" }
-      )
-
-      vim.api.nvim_create_user_command(
-        "DapLogBreakpoint",
-        ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log Message: '))",
-        { desc = "Set log message breakpoint" }
-      )
-      vim.api.nvim_create_user_command(
-        "DapConditionBreakpoint",
-        ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint Condition: '))",
-        { desc = "Set conditional breakpoint" }
-      )
-      vim.api.nvim_create_user_command(
-        "DapConditionHitBreakpoint",
-        ":lua require('dap').set_breakpoint(vim.fn.input('Breapoint Condition: '), vim.fn.input('Hit Condition: '))",
-        { desc = "Set condition and hit breakpoint" }
-      )
-      vim.api.nvim_create_user_command(
-        "DapHitBreakpoint",
-        ":lua require('dap').set_breakpoint(nil, vim.fn.input('Hit Condition: '))",
-        { desc = "Set hit breakpoint" }
-      )
-
-      -- PERF:
-      -- ====================================================
-      -- Configure DAP UI Listeners
-      -- ====================================================
-      local dapui = require("dapui")
-      dap.listeners.before.attach.dapui_config = function()
-        dapui.open()
+      for name, sign in pairs(dap_icons) do
+        sign = type(sign) == 'table' and sign or { sign }
+        vim.fn.sign_define('Dap' .. name, {
+          text = sign[1],
+          texthl = sign[2] or 'DiagnosticInfo',
+          linehl = sign[3],
+          numhl = sign[3],
+        })
       end
-      dap.listeners.before.launch.dapui_config = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated.dapui_config = function()
-        dapui.close()
-      end
-      dap.listeners.before.exited.dapui_config = function()
-        dapui.close()
+
+      -- setup dap config by VsCode launch.json file
+      local vscode = require 'dap.ext.vscode'
+      local json = require 'plenary.json'
+      vscode.json_decode = function(str)
+        return vim.json.decode(json.json_strip_comments(str))
       end
     end,
+  },
+  {
+    'rcarriga/nvim-dap-ui',
+    event = 'VeryLazy',
+    dependencies = { 'nvim-neotest/nvim-nio' },
+  -- stylua: ignore
+  keys = {
+    { "<leader>du", function() require("dapui").toggle({ }) end, desc = "Dap UI" },
+    { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
+  },
+    opts = {},
+    config = function(_, opts)
+      local dap = require 'dap'
+      local dapui = require 'dapui'
+      dapui.setup(opts)
+      dap.listeners.after.event_initialized['dapui_config'] = function()
+        dapui.open {}
+      end
+      dap.listeners.before.event_terminated['dapui_config'] = function()
+        dapui.close {}
+      end
+      dap.listeners.before.event_exited['dapui_config'] = function()
+        dapui.close {}
+      end
+    end,
+  },
+  {
+    'jay-babu/mason-nvim-dap.nvim',
+    dependencies = 'mason.nvim',
+    cmd = { 'DapInstall', 'DapUninstall' },
+    opts = {
+      -- Makes a best effort to setup the various debuggers with
+      -- reasonable debug configurations
+      automatic_installation = true,
+
+      -- You can provide additional configuration to the handlers,
+      -- see mason-nvim-dap README for more information
+      handlers = {},
+
+      -- You'll need to check that you have the required things installed
+      -- online, please don't ask me how to install them :)
+      ensure_installed = {
+        -- Update this to ensure that you have the debuggers for the langs you want
+      },
+    },
+    -- mason-nvim-dap is loaded when nvim-dap loads
+    config = function() end,
   },
 }

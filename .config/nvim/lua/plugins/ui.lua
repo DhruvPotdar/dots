@@ -1,580 +1,679 @@
 return {
-  --Yazi
   {
-    "mikavilpas/yazi.nvim",
-    event = "VeryLazy",
-    keys = {
-      --  in this section, choose your own keymappings!
-      {
-        "<leader>-",
-        "<cmd>Yazi<cr>",
-        desc = "Open Yazi at the current file",
-      },
-      {
-        -- Open in the current working directory
-        "<leader>cw",
-        "<cmd>Yazi cwd<cr>",
-        desc = "Open the Yazi in nvim's working directory",
-      },
-      {
-        -- NOTE: this requires a version of yazi that includes
-        -- https://github.com/sxyazi/yazi/pull/1305 from 2024-07-18
-        "<c-up>",
-        "<cmd>Yazi toggle<cr>",
-        desc = "Resume the last yazi session",
-      },
-    },
-    ---@type YaziConfig
-    opts = {
-      -- if you want to open yazi instead of netrw, see below for more info
-      open_for_directories = false,
-      keymaps = {
-        show_help = "<f1>",
-      },
-    },
-  },
-  --Edgy
-  {
-    "folke/edgy.nvim",
-    event = "VeryLazy",
-    keys = {
-      {
-        "<leader>ue",
-        function()
-          require("edgy").toggle()
-        end,
-        desc = "Edgy Toggle",
-      },
-    -- stylua: ignore
-    { "<leader>uE", function() require("edgy").select() end, desc = "Edgy Select Window" },
-    },
-    opts = function()
-      local opts = {
-        bottom = {
-          {
-            ft = "toggleterm",
-            size = { height = 0.4 },
-            filter = function(buf, win)
-              return vim.api.nvim_win_get_config(win).relative == ""
-            end,
-          },
-          {
-            ft = "noice",
-            size = { height = 0.4 },
-            filter = function(buf, win)
-              return vim.api.nvim_win_get_config(win).relative == ""
-            end,
-          },
-          {
-            ft = "lazyterm",
-            title = "LazyTerm",
-            size = { height = 0.4 },
-            filter = function(buf)
-              return not vim.b[buf].lazyterm_cmd
-            end,
-          },
-          "Trouble",
-          { ft = "qf", title = "QuickFix" },
-          {
-            ft = "help",
-            size = { height = 20 },
-            -- don't open help files in edgy that we're editing
-            filter = function(buf)
-              return vim.bo[buf].buftype == "help"
-            end,
-          },
-          { title = "Spectre", ft = "spectre_panel", size = { height = 0.4 } },
-          { title = "Neotest Output", ft = "neotest-output-panel", size = { height = 15 } },
-        },
-        left = {
-          { title = "Neotest Summary", ft = "neotest-summary" },
-          -- "neo-tree",
-        },
-        right = {
-          { title = "Grug Far", ft = "grug-far", size = { width = 0.4 } },
-        },
-        keys = {
-          -- increase width
-          ["<c-Right>"] = function(win)
-            win:resize("width", 2)
-          end,
-          -- decrease width
-          ["<c-Left>"] = function(win)
-            win:resize("width", -2)
-          end,
-          -- increase height
-          ["<c-Up>"] = function(win)
-            win:resize("height", 2)
-          end,
-          -- decrease height
-          ["<c-Down>"] = function(win)
-            win:resize("height", -2)
-          end,
-        },
-      }
-
-      if LazyVim.has("neo-tree.nvim") then
-        local pos = {
-          filesystem = "left",
-          buffers = "top",
-          git_status = "right",
-          document_symbols = "bottom",
-          diagnostics = "bottom",
-        }
-        local sources = LazyVim.opts("neo-tree.nvim").sources or {}
-        for i, v in ipairs(sources) do
-          table.insert(opts.right, i, {
-            title = "Neo-Tree " .. v:gsub("_", " "):gsub("^%l", string.upper),
-            ft = "neo-tree",
-            size = { width = 0.2 },
-            filter = function(buf)
-              return vim.b[buf].neo_tree_source == v
-            end,
-            pinned = false,
-            open = function()
-              vim.cmd(("Neotree show position=%s %s dir=%s"):format(pos[v] or "bottom", v, LazyVim.root()))
-            end,
-          })
-        end
-      end
-
-      for _, pos in ipairs({ "top", "bottom", "left", "right" }) do
-        opts[pos] = opts[pos] or {}
-        table.insert(opts[pos], {
-          ft = "trouble",
-          filter = function(_buf, win)
-            return vim.w[win].trouble
-              and vim.w[win].trouble.position == pos
-              and vim.w[win].trouble.type == "split"
-              and vim.w[win].trouble.relative == "editor"
-              and not vim.w[win].trouble_preview
-          end,
-        })
-      end
-      return opts
-    end,
-  },
-  -- Alpha
-  {
-    "goolord/alpha-nvim",
-
-    -- enabled = false,
-    event = "VimEnter",
-    init = false,
-    opts = function()
-      local dashboard = require("alpha.themes.dashboard")
-
-      local logo = [[
-                             ::                             
-                             ++                             
-                            -%%-                            
-                            #%%#                            
-                           =%%%%=                           
-         -                .#%##%#.                -         
-          *=              .%%##%%.              =*          
-          -%#-            -%%##%%-            -#%-          
-           #%#%-          +%%##%%+          -%#%#           
-           :%%#%#:        =%%**%%=        :#%#%%:           
-            =%%*%%+:      *%%**%%*      :+%%*%%=            
-             =%%*#%%-     *%%**%%*     -%%#*%%=             
-              -%%**%%*    -%%**%%-    *%%**%%-              
-               :%%#+%%#-  :%%**%%:  -#%%+#%%:               
-                .#%%+#%#+  #%**%#  +#%#+%%#.                
-    .-+=:.        =%%**%%+ +%**%+ +%%**%%=        .:=+-.    
-       =#%%**-:    .#%#*%%=.%##%.=%%*#%#.    :-**%%#=       
-        .=%%###%#+-: -#%*#%.+##+.%#*%#- :-+#%###%%=.        
-           :*%%####%#+::*###.**.###*::+#%####%%*:           
-              :+*%%#####+=+#+--+#+=+#####%%*+:              
-                  .-+*#####======#####*+-:                  
-                     :-=+++*++++*+++=-:                     
-                 :=#%##**+=: :: :=+**##%#=:                 
-                             --                             
-                             ::                             
-]]
-      dashboard.section.header.val = vim.split(logo, "\n")
-    -- stylua: ignore
-    dashboard.section.buttons.val = {
-      dashboard.button("f", " " .. " Find file",       LazyVim.pick()),
-      dashboard.button("c", " " .. " Config",          LazyVim.pick.config_files()),
-      dashboard.button("s", " " .. " Restore Session", [[<cmd> lua require("persistence").load() <cr>]]),
-      dashboard.button("x", " " .. " Lazy Extras",     "<cmd> LazyExtras <cr>"), 
-			dashboard.button("p", " " .. " Projects", "<cmd> Telescope projects <cr>")
-    }
-      for _, button in ipairs(dashboard.section.buttons.val) do
-        button.opts.hl = "AlphaButtons"
-        button.opts.hl_shortcut = "AlphaShortcut"
-      end
-      dashboard.section.header.opts.hl = "AlphaHeader"
-      dashboard.section.buttons.opts.hl = "AlphaButtons"
-      dashboard.section.footer.opts.hl = "AlphaFooter"
-      dashboard.opts.layout[1].val = 8
-      return dashboard
-    end,
-    config = function(_, dashboard)
-      -- close Lazy and re-open when the dashboard is ready
-      if vim.o.filetype == "lazy" then
-        vim.cmd.close()
-        vim.api.nvim_create_autocmd("User", {
-          once = true,
-          pattern = "AlphaReady",
-          callback = function()
-            require("lazy").show()
-          end,
-        })
-      end
-
-      require("alpha").setup(dashboard.opts)
-
-      vim.api.nvim_create_autocmd("User", {
-        once = true,
-        pattern = "LazyVimStarted",
-        callback = function()
-          local stats = require("lazy").stats()
-          local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-          dashboard.section.footer.val = "⚡ Neovim loaded "
-            .. stats.loaded
-            .. "/"
-            .. stats.count
-            .. " plugins in "
-            .. ms
-            .. "ms"
-          pcall(vim.cmd.AlphaRedraw)
-        end,
-      })
-    end,
-  },
-  { "echasnovski/mini.starter", enabled = false },
-  -- Undotree
-  {
-    "jiaoshijie/undotree",
-    dependencies = "nvim-lua/plenary.nvim",
-    config = true,
-    keys = { -- load the plugin only when using it's keybinding:
-      { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
-    },
-  },
-  --Which Key
-  {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
-    opts_extend = { "spec" },
-    opts = {
-      defaults = {},
-      spec = {
-        {
-          mode = { "n", "v" },
-          { "<leader><tab>", group = "tabs" },
-          { "<leader>c", group = "code" },
-          { "<leader>f", group = "file/find" },
-          { "<leader>g", group = "git" },
-          { "<leader>r", group = "ros2 commands" },
-          { "<leader>gh", group = "hunks" },
-          { "<leader>q", group = "quit/session" },
-          { "<leader>s", group = "search" },
-          { "<leader>u", group = "ui", icon = { icon = "󰙵 ", color = "cyan" } },
-          { "<leader>x", group = "diagnostics/quickfix", icon = { icon = "󱖫 ", color = "green" } },
-          { "[", group = "prev" },
-          { "]", group = "next" },
-          { "g", group = "goto" },
-          { "gs", group = "surround" },
-          { "z", group = "fold" },
-          {
-            "<leader>b",
-            group = "buffer",
-            expand = function()
-              return require("which-key.extras").expand.buf()
-            end,
-          },
-          {
-            "<leader>w",
-            group = "windows",
-            proxy = "<c-w>",
-            expand = function()
-              return require("which-key.extras").expand.win()
-            end,
-          },
-          -- better descriptions
-          { "gx", desc = "Open with system app" },
-        },
-      },
+    'akinsho/bufferline.nvim',
+    event = 'VeryLazy',
+    dependencies = {
+      -- 'nvim-tree/nvim-web-devicons', -- optional, for icons
     },
     keys = {
-      {
-        "<leader>?",
-        function()
-          require("which-key").show({ global = false })
-        end,
-        desc = "Buffer Keymaps (which-key)",
-      },
-      {
-        "<c-w><space>",
-        function()
-          require("which-key").show({ keys = "<c-w>", loop = true })
-        end,
-        desc = "Window Hydra Mode (which-key)",
-      },
-    },
-    config = function(_, opts)
-      local wk = require("which-key")
-      wk.setup(opts)
-      if not vim.tbl_isempty(opts.defaults) then
-        LazyVim.warn("which-key: opts.defaults is deprecated. Please use opts.spec instead.")
-        wk.register(opts.defaults)
-      end
-    end,
-  },
-  -- Reactive
-  {
-    "rasulomaroff/reactive.nvim",
-    config = function()
-      require("reactive").setup({
-        builtin = {
-          cursorline = true,
-          cursor = true,
-          modemsg = true,
-        },
-      })
-    end,
-  },
-  -- Animate
-  {
-    "echasnovski/mini.animate",
-    -- enabled = false,
-    recommended = true,
-    event = "VeryLazy",
-    opts = function()
-      -- don't use animate when scrolling with the mouse
-      local mouse_scrolled = false
-      for _, scroll in ipairs({ "Up", "Down" }) do
-        local key = "<ScrollWheel" .. scroll .. ">"
-        vim.keymap.set({ "", "i" }, key, function()
-          mouse_scrolled = true
-          return key
-        end, { expr = true })
-      end
-
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "grug-far",
-        callback = function()
-          vim.b.minianimate_disable = true
-        end,
-      })
-
-      Snacks.toggle({
-        name = "Mini Animate",
-        get = function()
-          return not vim.g.minianimate_disable
-        end,
-        set = function(state)
-          vim.g.minianimate_disable = not state
-        end,
-      }):map("<leader>ua")
-
-      local animate = require("mini.animate")
-      return {
-        resize = {
-          timing = animate.gen_timing.linear({ duration = 10, unit = "total" }),
-        },
-        scroll = {
-          timing = animate.gen_timing.linear({ duration = 10, unit = "total" }),
-          subscroll = animate.gen_subscroll.equal({
-            predicate = function(total_scroll)
-              if mouse_scrolled then
-                mouse_scrolled = false
-                return false
-              end
-              return total_scroll > 1
-            end,
-          }),
-        },
-      }
-    end,
-  },
-  -- Bufferline
-  {
-    "akinsho/bufferline.nvim",
-    enabled = true,
-    event = "VeryLazy",
-    keys = {
-      { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle Pin" },
-      { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete Non-Pinned Buffers" },
-      { "<leader>br", "<Cmd>BufferLineCloseRight<CR>", desc = "Delete Buffers to the Right" },
-      { "<leader>bl", "<Cmd>BufferLineCloseLeft<CR>", desc = "Delete Buffers to the Left" },
-      { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev Buffer" },
-      { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next Buffer" },
-      { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev Buffer" },
-      { "]b", "<cmd>BufferLineCycleNext<cr>", desc = "Next Buffer" },
-      { "[B", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer prev" },
-      { "]B", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer next" },
+      { '<leader>bp', '<Cmd>BufferLineTogglePin<CR>', desc = 'Toggle Pin' },
+      { '<leader>bP', '<Cmd>BufferLineGroupClose ungrouped<CR>', desc = 'Delete Non-Pinned Buffers' },
+      { '<leader>br', '<Cmd>BufferLineCloseRight<CR>', desc = 'Delete Buffers to the Right' },
+      { '<leader>bl', '<Cmd>BufferLineCloseLeft<CR>', desc = 'Delete Buffers to the Left' },
+      { '<S-h>', '<cmd>BufferLineCyclePrev<cr>', desc = 'Prev Buffer' },
+      { '<S-l>', '<cmd>BufferLineCycleNext<cr>', desc = 'Next Buffer' },
+      { '[b', '<cmd>BufferLineCyclePrev<cr>', desc = 'Prev Buffer' },
+      { ']b', '<cmd>BufferLineCycleNext<cr>', desc = 'Next Buffer' },
+      { '[B', '<cmd>BufferLineMovePrev<cr>', desc = 'Move Buffer Prev' },
+      { ']B', '<cmd>BufferLineMoveNext<cr>', desc = 'Move Buffer Next' },
     },
     opts = {
       options = {
-      -- stylua: ignore
-      close_command = function(n) Snacks.bufdelete(n) end,
-      -- stylua: ignore
-      right_mouse_command = function(n) Snacks.bufdelete(n) end,
-        diagnostics = "nvim_lsp",
+        close_command = function(n)
+          require('snacks').bufdelete(n)
+        end,
+        right_mouse_command = function(n)
+          require('snacks').bufdelete(n)
+        end,
+        diagnostics = 'nvim_lsp',
         always_show_bufferline = false,
         diagnostics_indicator = function(_, _, diag)
-          local icons = LazyVim.config.icons.diagnostics
-          local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-            .. (diag.warning and icons.Warn .. diag.warning or "")
+          local icons = require 'radtop.icons'
+          local ret = (diag.error and icons.diagnostics.Error .. diag.error .. ' ' or '') .. (diag.warning and icons.diagnostics.Warn .. diag.warning or '')
           return vim.trim(ret)
         end,
-        truncate_names = false,
         offsets = {
           {
-            filetype = "neo-tree",
-            text = "Neo-tree",
-            highlight = "Directory",
-            text_align = "left",
+            filetype = 'neo-tree',
+            text = 'Neo-tree',
+            highlight = 'Directory',
+            text_align = 'left',
+          },
+          {
+            filetype = 'snacks_layout_box',
           },
         },
-        ---@param opts bufferline.IconFetcherOpts
+        -- FIXME: Get colored icons
         get_element_icon = function(opts)
-          return LazyVim.config.icons.ft[opts.filetype]
+          -- Customize this depending on your icon setup
+          local devicons = require 'nvim-web-devicons'
+          local icon, _ = devicons.get_icon_by_filetype(opts.filetype)
+          return icon
         end,
-        style_preset = require("bufferline").style_preset.minimal,
-        seperator_style = "slope",
-        highlights = {
-          tab_selected = {
-            fg = "#a7a9b5ca",
-          },
-        },
       },
+      highlights = require('catppuccin.groups.integrations.bufferline').get(),
     },
     config = function(_, opts)
-      require("bufferline").setup(opts)
-      -- Fix bufferline when restoring a session
-      vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
+      require('bufferline').setup(opts)
+      vim.api.nvim_create_autocmd({ 'BufAdd', 'BufDelete' }, {
         callback = function()
           vim.schedule(function()
-            pcall(nvim_bufferline)
+            pcall(require('bufferline').refresh)
           end)
         end,
       })
     end,
   },
-  -- Lualine
   {
-    "nvim-lualine/lualine.nvim",
+    'folke/noice.nvim',
+    event = 'VeryLazy',
+
+    opts = {
+      lsp = {
+        override = {
+          ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+          ['vim.lsp.util.stylize_markdown'] = true,
+          ['cmp.entry.get_documentation'] = true,
+        },
+      },
+      views = {
+        mini = { border = { style = 'rounded' } },
+        -- notify = {
+        --   backend = 'mini',
+        -- },
+      },
+      presets = {
+        inc_rename = true,
+        bottom_search = false,
+        command_palette = true,
+        long_message_to_split = true,
+        lsp_doc_border = true,
+      },
+    },
+  -- stylua: ignore
+  keys = {
+    { "<leader>sn", "", desc = "+noice"},
+    { "<S-Enter>", function() require("noice").redirect(vim.fn.getcmdline()) end, mode = "c", desc = "Redirect Cmdline" },
+    { "<leader>snl", function() require("noice").cmd("last") end, desc = "Noice Last Message" },
+    { "<leader>snh", function() require("noice").cmd("history") end, desc = "Noice History" },
+    { "<leader>sna", function() require("noice").cmd("all") end, desc = "Noice All" },
+    { "<leader>snd", function() require("noice").cmd("dismiss") end, desc = "Dismiss All" },
+    { "<leader>snt", function() require("noice").cmd("pick") end, desc = "Noice Picker (Telescope/FzfLua)" },
+    { "<c-f>", function() if not require("noice.lsp").scroll(4) then return "<c-f>" end end, silent = true, expr = true, desc = "Scroll Forward", mode = {"i", "n", "s"} },
+    { "<c-b>", function() if not require("noice.lsp").scroll(-4) then return "<c-b>" end end, silent = true, expr = true, desc = "Scroll Backward", mode = {"i", "n", "s"}},
+  },
+    config = function(_, opts)
+      -- HACK: noice shows messages from before it was enabled,
+      -- but this is not ideal when Lazy is installing plugins,
+      -- so clear the messages in this case.
+      if vim.o.filetype == 'lazy' then
+        vim.cmd [[messages clear]]
+      end
+      require('noice').setup(opts)
+    end,
+  },
+  { 'MunifTanjim/nui.nvim', lazy = true },
+  { 'nvim-lua/plenary.nvim', lazy = true },
+
+  {
+
+    {
+      'nvim-neo-tree/neo-tree.nvim',
+      branch = 'v3.x',
+      cmd = 'Neotree',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        -- 'nvim-tree/nvim-web-devicons', -- optional but recommended
+        'MunifTanjim/nui.nvim',
+      },
+      keys = {
+        {
+          '<leader>fe',
+          function()
+            require('neo-tree.command').execute { toggle = true, dir = vim.uv.cwd() }
+          end,
+          desc = 'Explorer NeoTree (Root Dir)',
+        },
+        {
+          '<leader>fE',
+          function()
+            require('neo-tree.command').execute { toggle = true, dir = vim.uv.cwd() }
+          end,
+          desc = 'Explorer NeoTree (cwd)',
+        },
+        { '<leader>e', '<leader>fe', desc = 'Explorer NeoTree (Root Dir)', remap = true },
+        { '<leader>E', '<leader>fE', desc = 'Explorer NeoTree (cwd)', remap = true },
+        {
+          '<leader>ge',
+          function()
+            require('neo-tree.command').execute { source = 'git_status', toggle = true }
+          end,
+          desc = 'Git Explorer',
+        },
+        {
+          '<leader>be',
+          function()
+            require('neo-tree.command').execute { source = 'buffers', toggle = true }
+          end,
+          desc = 'Buffer Explorer',
+        },
+      },
+      deactivate = function()
+        vim.cmd [[Neotree close]]
+      end,
+      init = function()
+        vim.api.nvim_create_autocmd('BufEnter', {
+          group = vim.api.nvim_create_augroup('Neotree_start_directory', { clear = true }),
+          desc = 'Start Neo-tree with directory',
+          once = true,
+          callback = function()
+            if package.loaded['neo-tree'] then
+              return
+            else
+              local stats = vim.uv.fs_stat(vim.fn.argv(0))
+              if stats and stats.type == 'directory' then
+                require 'neo-tree'
+              end
+            end
+          end,
+        })
+      end,
+      opts = {
+        sources = { 'filesystem' },
+        open_files_do_not_replace_types = { 'terminal', 'Trouble', 'trouble', 'qf', 'Outline' },
+        filesystem = {
+          bind_to_cwd = false,
+          follow_current_file = { enabled = true },
+          use_libuv_file_watcher = true,
+        },
+        window = {
+          mappings = {
+            ['l'] = 'open',
+            ['h'] = 'close_node',
+            ['<space>'] = 'none',
+            ['Y'] = {
+              function(state)
+                local node = state.tree:get_node()
+                local path = node:get_id()
+                vim.fn.setreg('+', path, 'c')
+              end,
+              desc = 'Copy Path to Clipboard',
+            },
+            ['O'] = {
+              function(state)
+                require('lazy.util').open(state.tree:get_node().path, { system = true })
+              end,
+              desc = 'Open with System Application',
+            },
+            ['P'] = { 'toggle_preview', config = { use_float = false } },
+          },
+        },
+        default_component_configs = {
+          indent = {
+            with_expanders = true,
+            expander_collapsed = '',
+            expander_expanded = '',
+            expander_highlight = 'NeoTreeExpander',
+          },
+          git_status = {
+            symbols = {
+              unstaged = '󰄱',
+              staged = '󰱒',
+            },
+          },
+        },
+      },
+      config = function(_, opts)
+        local function on_move(data)
+          Snacks.rename.on_rename_file(data.source, data.destination)
+        end
+
+        local events = require 'neo-tree.events'
+        opts.event_handlers = opts.event_handlers or {}
+        vim.list_extend(opts.event_handlers, {
+          { event = events.FILE_MOVED, handler = on_move },
+          { event = events.FILE_RENAMED, handler = on_move },
+        })
+        require('neo-tree').setup(opts)
+        vim.api.nvim_create_autocmd('TermClose', {
+          pattern = '*lazygit',
+          callback = function()
+            if package.loaded['neo-tree.sources.git_status'] then
+              require('neo-tree.sources.git_status').refresh()
+            end
+          end,
+        })
+      end,
+    },
+  },
+
+  {
+    'hedyhli/outline.nvim',
+    keys = {
+      { '<leader>cs', '<cmd>Outline<cr>', desc = 'Toggle Outline' },
+    },
+    cmd = 'Outline',
+    opts = function()
+      local defaults = require('outline.config').defaults
+
+      -- Define your own kind filter or leave empty
+      local kind_filter = {
+        -- example: exclude some kinds if you want, or leave empty to show all
+        -- "Variable",
+        -- "Constant",
+      }
+
+      -- Define your own icons for symbol kinds or use defaults from outline.nvim
+      local icons = {
+        File = ' ',
+        Module = ' ',
+        Namespace = ' ',
+        Package = ' ',
+        Class = ' ',
+        Method = ' ',
+        Property = ' ',
+        Field = ' ',
+        Constructor = ' ',
+        Enum = '  ',
+        Interface = ' ',
+        Function = ' ',
+        Variable = ' ',
+        Constant = ' ',
+        String = ' ',
+        Number = ' ',
+        Boolean = ' ',
+        Array = '󰅨 ',
+        Object = ' ',
+        Key = ' ',
+        Null = 'ﳠ ',
+        EnumMember = ' ',
+        Struct = '󱁊 ',
+        Event = ' ',
+        Operator = ' ',
+        TypeParameter = '󰅵 ',
+      }
+
+      local opts = {
+        symbols = {
+          icons = {},
+          filter = kind_filter,
+        },
+        keymaps = {
+          up_and_jump = '<up>',
+          down_and_jump = '<down>',
+        },
+      }
+
+      for kind, symbol in pairs(defaults.symbols.icons) do
+        opts.symbols.icons[kind] = {
+          icon = icons[kind] or symbol.icon,
+          hl = symbol.hl,
+        }
+      end
+
+      return opts
+    end,
+  },
+
+  {
+    'folke/edgy.nvim',
+    event = 'VeryLazy',
+    keys = {
+      {
+        '<leader>ue',
+        function()
+          require('edgy').toggle()
+        end,
+        desc = 'Edgy Toggle',
+      },
+    -- stylua: ignore
+    { '<leader>uE', function() require('edgy').select() end, desc = 'Edgy Select Window' },
+    },
+    opts = function()
+      local opts = {
+        bottom = {
+          {
+            ft = 'toggleterm',
+            size = { height = 0.4 },
+            filter = function(_buf, win)
+              return vim.api.nvim_win_get_config(win).relative == ''
+            end,
+          },
+          {
+            ft = 'noice',
+            size = { height = 0.4 },
+            filter = function(_buf, win)
+              return vim.api.nvim_win_get_config(win).relative == ''
+            end,
+          },
+          'Trouble',
+          { ft = 'qf', title = 'QuickFix' },
+          {
+            ft = 'help',
+            size = { height = 20 },
+            filter = function(buf)
+              return vim.bo[buf].buftype == 'help'
+            end,
+          },
+          { title = 'Spectre', ft = 'spectre_panel', size = { height = 0.4 } },
+          { title = 'Neotest Output', ft = 'neotest-output-panel', size = { height = 15 } },
+        },
+        left = {
+          { title = 'Neotest Summary', ft = 'neotest-summary' },
+          -- You can add 'neo-tree' here if you want it always visible
+        },
+        right = {
+          { title = 'Grug Far', ft = 'grug-far', size = { width = 0.4 } },
+        },
+        keys = {
+          ['<c-Right>'] = function(win)
+            win:resize('width', 2)
+          end,
+          ['<c-Left>'] = function(win)
+            win:resize('width', -2)
+          end,
+          ['<c-Up>'] = function(win)
+            win:resize('height', 2)
+          end,
+          ['<c-Down>'] = function(win)
+            win:resize('height', -2)
+          end,
+        },
+      }
+
+      -- Define neo-tree sources manually here
+      local neo_tree_sources = { 'filesystem' }
+
+      -- Define positions for each source
+      local pos = {
+        filesystem = 'right',
+        document_symbols = 'bottom',
+        diagnostics = 'bottom',
+      }
+
+      -- Get current working directory as root
+      local root_dir = vim.loop.cwd()
+
+      -- Insert neo-tree windows into the left panel
+      for i, source in ipairs(neo_tree_sources) do
+        table.insert(opts.right, i, {
+          title = 'Neo-Tree ' .. source:gsub('_', ' '):gsub('^%l', string.upper),
+          ft = 'neo-tree',
+          filter = function(buf)
+            return vim.b[buf].neo_tree_source == source
+          end,
+          pinned = true,
+          open = function()
+            vim.cmd(('Neotree show position=%s %s dir=%s'):format(pos[source] or 'bottom', source, root_dir))
+          end,
+        })
+      end
+
+      -- Add trouble windows to all positions
+      for _, position in ipairs { 'top', 'bottom', 'left', 'right' } do
+        opts[position] = opts[position] or {}
+        table.insert(opts[position], {
+          ft = 'trouble',
+          filter = function(_buf, win)
+            return vim.w[win].trouble
+              and vim.w[win].trouble.position == position
+              and vim.w[win].trouble.type == 'split'
+              and vim.w[win].trouble.relative == 'editor'
+              and not vim.w[win].trouble_preview
+          end,
+        })
+      end
+
+      -- Add snacks_terminal windows to all positions
+      for _, position in ipairs { 'top', 'bottom', 'left', 'right' } do
+        opts[position] = opts[position] or {}
+        table.insert(opts[position], {
+          ft = 'snacks_terminal',
+          size = { height = 0.4 },
+          title = '%{b:snacks_terminal.id}: %{b:term_title}',
+          filter = function(_buf, win)
+            return vim.w[win].snacks_win
+              and vim.w[win].snacks_win.position == position
+              and vim.w[win].snacks_win.relative == 'editor'
+              and not vim.w[win].trouble_preview
+          end,
+        })
+      end
+
+      return opts
+    end,
+  },
+  {
+    'sphamba/smear-cursor.nvim',
+    enabled = false,
+    event = 'VeryLazy',
+    cond = vim.g.neovide == nil,
+    opts = {
+      hide_target_hack = true,
+      cursor_color = 'none',
+    },
+  },
+  {
+    'Bekaboo/dropbar.nvim',
+    event = 'VeryLazy',
+    -- optional, but required for fuzzy finder support
+    dependencies = {
+      'nvim-telescope/telescope-fzf-native.nvim',
+      build = 'make',
+    },
+    config = function()
+      local dropbar_api = require 'dropbar.api'
+      vim.keymap.set('n', '<Leader>;', dropbar_api.pick, { desc = 'Pick symbols in winbar' })
+      vim.keymap.set('n', '[;', dropbar_api.goto_context_start, { desc = 'Go to start of current context' })
+      vim.keymap.set('n', '];', dropbar_api.select_next_context, { desc = 'Select next context' })
+    end,
+  },
+
+  {
+    'rasulomaroff/reactive.nvim',
+    event = 'VeryLazy',
     enabled = true,
-    event = "VeryLazy",
+    config = function()
+      require('reactive').setup {
+        -- load = { "catpuccin-mocha-cursorline" },
+        builtin = {
+          cursorline = true,
+          cursor = false,
+          modemsg = false,
+        },
+      }
+    end,
+  },
+
+  {
+    'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
     init = function()
       vim.g.lualine_laststatus = vim.o.laststatus
       if vim.fn.argc(-1) > 0 then
         -- set an empty statusline till lualine loads
-        vim.o.statusline = " "
+        vim.o.statusline = ' '
       else
         -- hide the statusline on the starter page
         vim.o.laststatus = 0
       end
     end,
     opts = function()
-      -- PERF: we don't need this lualine require madness 🤷
-      local lualine_require = require("lualine_require")
+      local lualine_require = require 'lualine_require'
       lualine_require.require = require
 
-      local icons = LazyVim.config.icons
+      local icons = require 'radtop.icons'
+      local component_widths = {}
+
+      -- check width of current component and add to maps
+      local function add_width(str, name)
+        if not str or str == '' then
+          component_widths[name] = 0
+          return str
+        end
+        component_widths[name] = #vim.api.nvim_eval_statusline(str, {}).str
+        return str
+      end
+
+      -- fill space bweteen left-most components and middle of terminal
+      local function fill_space()
+        local used_space = 0
+        for _, width in pairs(component_widths) do
+          used_space = used_space + width
+        end
+
+        local filetype_w = component_widths['filetype'] or 0
+        local filename_w = component_widths['filename'] or 0
+
+        used_space = used_space - (filename_w + filetype_w)
+
+        local term_width = vim.opt.columns:get()
+
+        local fill = string.rep(' ', math.floor((term_width - filename_w - filetype_w) / 2) - used_space)
+        return fill
+      end
 
       vim.o.laststatus = vim.g.lualine_laststatus
-
-      local colors = {
-        darkgray = "#0e0d17",
-        gray = "#4a4d59",
-        innerbg = nil,
-        outerbg = nil,
-        normal = "#ad8fd6",
-        insert = "#85e0cb",
-        visual = "#478584",
-        replace = "#e46876",
-        command = "#e6c384",
-      }
       local opts = {
         options = {
-          theme = {
-            inactive = {
-              a = { fg = colors.gray, bg = colors.outerbg, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
-            visual = {
-              a = { fg = colors.darkgray, bg = colors.visual, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
-            replace = {
-              a = { fg = colors.darkgray, bg = colors.replace, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
-            normal = {
-              a = { fg = colors.darkgray, bg = colors.normal, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
-            insert = {
-              a = { fg = colors.darkgray, bg = colors.insert, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
-            command = {
-              a = { fg = colors.darkgray, bg = colors.command, gui = "bold" },
-              b = { fg = colors.gray, bg = colors.outerbg },
-              c = { fg = colors.gray, bg = colors.innerbg },
-            },
+          theme = 'auto',
+          component_separators = '',
+          section_separators = '',
+          globalstatus = true,
+          disabled_filetypes = {
+            statusline = { 'dashboard', 'alpha', 'ministarter', 'snacks_dashboard' },
+            winbar = { 'dashboard', 'alpha', 'ministarter', 'snacks_dashboard' },
           },
-
-          globalstatus = vim.o.laststatus == 3,
-          section_separators = { left = " ", right = " " },
-          disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
         },
         sections = {
-          lualine_a = { "mode" },
-          lualine_b = { "branch" },
-
+          lualine_a = {
+            { -- show current vim mode single character
+              function()
+                local mode = vim.api.nvim_get_mode()['mode']
+                return '' .. string.format('%-1s', mode)
+              end,
+              fmt = function(str)
+                return add_width(str, 'mode')
+              end,
+            },
+          },
+          lualine_b = {},
           lualine_c = {
-            LazyVim.lualine.root_dir(),
-            {
-              "diagnostics",
+            { -- show cwd (project dir nvim.project)
+              function()
+                local cwd = vim.fn.getcwd()
+                return '󱉭 ' .. vim.fs.basename(cwd)
+              end,
+              color = { fg = Snacks.util.color 'Special' },
+              fmt = function(str)
+                return add_width(str, 'root')
+              end,
+            },
+            -- { -- show cwd if it does not match prev component
+            --   function()
+            --     return require("radtop.utils").get_root_dir_component({icon = ">"})
+            --     return LazyVim.lualine.root_dir({ icon = '>' })[1]()
+            --   end,
+            --   color = { fg = Snacks.util.color 'Special' }, -- Optional: Customize the appearance
+            --   padding = { left = 0, right = 0 },
+            --   fmt = function(str)
+            --     return add_width(str, 'cwd')
+            --   end,
+            -- },
+            { -- show profiler events if enabled
+              function()
+                if Snacks.profiler.core.running then
+                  return Snacks.profiler.status()[1]()
+                end
+                return ''
+              end,
+              color = 'DiagnosticError',
+              fmt = function(str)
+                return add_width(str, 'profiler')
+              end,
+            },
+            { -- show macro recording
+              function()
+                local reg = vim.fn.reg_recording()
+                if reg == '' then
+                  return ''
+                end -- not recording
+                return ' recording to @' .. reg
+              end,
+              padding = { left = 0, right = 0 },
+              color = function()
+                return { fg = Snacks.util.color 'Constant' }
+              end,
+              fmt = function(str)
+                return add_width(str, 'recording')
+              end,
+            },
+            { -- show dap info
+              function()
+                return '  ' .. require('dap').status()
+              end,
+              cond = function()
+                return package.loaded['dap'] and require('dap').status() ~= ''
+              end,
+              color = function()
+                return { fg = Snacks.util.color 'Debug' }
+              end,
+              fmt = function(str)
+                return add_width(str, 'dap')
+              end,
+            },
+            { -- show lazy update status
+              require('lazy.status').updates,
+              cond = require('lazy.status').has_updates,
+              color = function()
+                return { fg = Snacks.util.color 'Special' }
+              end,
+              fmt = function(str)
+                return add_width(str, 'lazy')
+              end,
+            },
+            { -- show diagnostic info
+              'diagnostics',
               symbols = {
                 error = icons.diagnostics.Error,
                 warn = icons.diagnostics.Warn,
                 info = icons.diagnostics.Info,
                 hint = icons.diagnostics.Hint,
               },
+              fmt = function(str)
+                return add_width(str, 'diagnostics')
+              end,
             },
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-            { LazyVim.lualine.pretty_path() },
+            { -- fill space to center filename
+              function()
+                return fill_space()
+              end,
+              padding = { left = 0, right = 0 },
+            },
+            { -- filetype icon
+              'filetype',
+              icon_only = true,
+              separator = '',
+              padding = { left = 0, right = 0 },
+              fmt = function(str)
+                return add_width(str, 'filetype')
+              end,
+            },
+            { -- filename centered to middle of window
+              'filename',
+              file_status = true,
+              newfile_status = true,
+              color = { fg = Snacks.util.color 'Special', gui = 'BOLD' },
+              padding = { left = 0, right = 0 },
+              fmt = function(str)
+                return add_width(str, 'filename')
+              end,
+            },
           },
+
           lualine_x = {
-            Snacks.profiler.status(),
-          -- stylua: ignore
-          {
-            function() return require("noice").api.status.command.get() end,
-            cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-            color = function() return { fg = Snacks.util.color("Statement") } end,
-          },
-          -- stylua: ignore
-          {
-            function() return require("noice").api.status.mode.get() end,
-            cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-            color = function() return { fg = Snacks.util.color("Constant") } end,
-          },
-          -- stylua: ignore
-          {
-            function() return "  " .. require("dap").status() end,
-            cond = function() return package.loaded["dap"] and require("dap").status() ~= "" end,
-            color = function() return { fg = Snacks.util.color("Debug") } end,
-          },
-          -- stylua: ignore
-          {
-            require("lazy.status").updates,
-            cond = require("lazy.status").has_updates,
-            color = function() return { fg = Snacks.util.color("Special") } end,
-          },
             {
-              "diff",
+              'diff',
               symbols = {
                 added = icons.git.added,
                 modified = icons.git.modified,
@@ -591,42 +690,108 @@ return {
                 end
               end,
             },
+            { 'branch', color = { fg = Snacks.util.color 'Special' } },
           },
-          lualine_y = {
-            { "progress", separator = " ", padding = { left = 1, right = 0 } },
-            { "location", padding = { left = 0, right = 1 } },
-          },
+
+          lualine_y = {},
           lualine_z = {
             function()
-              return " " .. os.date("%R")
+              local mode = vim.api.nvim_get_mode()['mode']
+              return '' .. string.format('%-1s', mode)
             end,
           },
         },
-        extensions = { "neo-tree", "lazy", "fzf" },
+        inactive_sections = {
+          lualine_a = {},
+          lualine_b = {},
+          lualine_c = {
+            { '%=' },
+            {
+              'filename',
+              file_status = true,
+              newfile_status = true,
+              color = { fg = Snacks.util.color 'Normal', gui = 'italic' },
+            },
+          },
+          lualine_x = {},
+          lualine_y = {},
+          lualine_z = {},
+        },
+        extensions = { 'lazy', 'fzf' },
       }
-
-      -- do not add trouble symbols if aerial is enabled
-      -- And allow it to be overriden for some buffer types (see autocmds)
-      if vim.g.trouble_lualine and LazyVim.has("trouble.nvim") then
-        local trouble = require("trouble")
-        local symbols = trouble.statusline({
-          mode = "symbols",
-          groups = {},
-          title = false,
-          filter = { range = true },
-          format = "{kind_icon}{symbol.name:Normal}",
-          hl_group = "lualine_c_normal",
-        })
-        table.insert(opts.sections.lualine_c, {
-          symbols and symbols.get,
-          cond = function()
-            return vim.b.trouble_lualine ~= false and symbols.has()
-          end,
-        })
-      end
 
       return opts
     end,
   },
-  -- { "LazyVim/LazyVim", opts = { colorscheme = "yorumi" } },
+  {
+    'gbprod/yanky.nvim',
+    recommended = true,
+    desc = 'Better Yank/Paste',
+    event = 'BufReadPost',
+    opts = {
+      highlight = { timer = 150 },
+    },
+    keys = {
+      {
+        '<leader>p',
+        function()
+          -- if LazyVim.pick.picker.name == 'telescope' then
+          --   require('telescope').extensions.yank_history.yank_history {}
+          -- else
+          --   vim.cmd [[YankyRingHistory]]
+          -- end
+        end,
+        mode = { 'n', 'x' },
+        desc = 'Open Yank History',
+      },
+        -- stylua: ignore
+    { "y", "<Plug>(YankyYank)", mode = { "n", "x" }, desc = "Yank Text" },
+      { 'p', '<Plug>(YankyPutAfter)', mode = { 'n', 'x' }, desc = 'Put Text After Cursor' },
+      { 'P', '<Plug>(YankyPutBefore)', mode = { 'n', 'x' }, desc = 'Put Text Before Cursor' },
+      { 'gp', '<Plug>(YankyGPutAfter)', mode = { 'n', 'x' }, desc = 'Put Text After Selection' },
+      { 'gP', '<Plug>(YankyGPutBefore)', mode = { 'n', 'x' }, desc = 'Put Text Before Selection' },
+      { '[y', '<Plug>(YankyCycleForward)', desc = 'Cycle Forward Through Yank History' },
+      { ']y', '<Plug>(YankyCycleBackward)', desc = 'Cycle Backward Through Yank History' },
+      { ']p', '<Plug>(YankyPutIndentAfterLinewise)', desc = 'Put Indented After Cursor (Linewise)' },
+      { '[p', '<Plug>(YankyPutIndentBeforeLinewise)', desc = 'Put Indented Before Cursor (Linewise)' },
+      { ']P', '<Plug>(YankyPutIndentAfterLinewise)', desc = 'Put Indented After Cursor (Linewise)' },
+      { '[P', '<Plug>(YankyPutIndentBeforeLinewise)', desc = 'Put Indented Before Cursor (Linewise)' },
+      { '>p', '<Plug>(YankyPutIndentAfterShiftRight)', desc = 'Put and Indent Right' },
+      { '<p', '<Plug>(YankyPutIndentAfterShiftLeft)', desc = 'Put and Indent Left' },
+      { '>P', '<Plug>(YankyPutIndentBeforeShiftRight)', desc = 'Put Before and Indent Right' },
+      { '<P', '<Plug>(YankyPutIndentBeforeShiftLeft)', desc = 'Put Before and Indent Left' },
+      { '=p', '<Plug>(YankyPutAfterFilter)', desc = 'Put After Applying a Filter' },
+      { '=P', '<Plug>(YankyPutBeforeFilter)', desc = 'Put Before Applying a Filter' },
+    },
+  },
+  {
+    'rcarriga/nvim-notify',
+    keys = {
+      {
+        '<leader>un',
+        function()
+          require('notify').dismiss { silent = true, pending = true }
+        end,
+        desc = 'Dismiss All Notifications',
+      },
+    },
+    opts = {
+      stages = 'fade',
+      top_down = false,
+      timeout = 2000,
+      -- max_height = function()
+      --   return math.floor(vim.o.lines * 0.75)
+      -- end,
+      -- max_width = function()
+      --   return math.floor(vim.o.columns * 0.75)
+      -- end,
+      -- on_open = function(win)
+      --   vim.api.nvim_win_set_config(win, { zindex = 100 })
+      -- end,
+    },
+    config = function(opts)
+      require('notify').setup { background_colour = '#000000' }
+      vim.notify = require 'notify'
+    end,
+  },
 }
