@@ -5,12 +5,15 @@ return {
         -- Automatically install LSPs and related tools to stdpath for Neovim
         -- Mason must be loaded before its dependents so we need to set it up here.
         -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
-        { 'williamboman/mason.nvim', opts = {} },
+        {
+            'williamboman/mason.nvim',
+            opts = {},
+        },
         'williamboman/mason-lspconfig.nvim',
         'WhoIsSethDaniel/mason-tool-installer.nvim',
 
         -- Useful status updates for LSP.
-        { 'j-hui/fidget.nvim',       opts = {} },
+        { 'j-hui/fidget.nvim', opts = {} },
 
         -- Allows extra capabilities provided by blink.cmp
         'saghen/blink.cmp',
@@ -48,8 +51,6 @@ return {
         vim.api.nvim_create_autocmd('LspAttach', {
             group = vim.api.nvim_create_augroup('radtop-lsp-attach', { clear = true }),
             callback = function(event)
-                -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-                -- to define small helper and utility functions so you don't have to repeat yourself.
                 --
                 -- In this case, we create a function that lets us more easily define mappings specific
                 -- for LSP related items. It sets the mode, buffer and description for us each time.
@@ -138,9 +139,7 @@ return {
                 --
                 -- This may be unwanted, since they displace some of your code
                 if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-                    map('<leader>th', function()
-                        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-                    end, '[T]oggle Inlay [H]ints')
+                    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
                 end
             end,
         })
@@ -193,25 +192,27 @@ return {
             clangd = {
                 -- see clangd --help-hidden
                 'clangd',
-                -- '--background-index',
-                -- -- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
-                -- -- to add more checks, create .clang-tidy file in the root directory
-                -- -- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
-                -- '--compile-commands-dir=..',
-                -- '--clang-tidy',
-                -- '--index=true',
-                -- '--completion-parse=always',
-                -- '--completion-style=detailed',
-                -- '--experimental-modules-support',
-                -- '--fallback-style=google',
-                -- '--header-insertion=iwyu',
-                -- '--header-insertion-decorators',
-                -- '--ranking-model=decision_forest',
-                -- '--function-arg-placeholders',
-                -- '-j16',
-                -- '--malloc-trim',
-                -- '--sync',
-                -- '--use-dirty-headers',
+                '--background-index',
+                -- by default, clang-tidy use -checks=clang-diagnostic-*,clang-analyzer-*
+                -- to add more checks, create .clang-tidy file in the root directory
+                -- and add Checks key, see https://clang.llvm.org/extra/clang-tidy/
+                '--compile-commands-dir=..',
+                '--clang-tidy',
+                '--clang-tidy-checks=*',
+                '--index=true',
+                '--inlay_hints=true',
+                '--completion-parse=always',
+                '--completion-style=detailed',
+                '--experimental-modules-support',
+                '--fallback-style=google',
+                '--header-insertion=iwyu',
+                '--header-insertion-decorators',
+                '--ranking-model=decision_forest',
+                '--function-arg-placeholders',
+                '-j16',
+                '--malloc-trim',
+                '--sync',
+                '--use-dirty-headers',
             },
             basedpyright = {
                 settings = {
@@ -292,6 +293,7 @@ return {
                     },
                 },
             },
+            codelldb = {},
         }
 
         -- Ensure the servers and tools above are installed

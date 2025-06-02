@@ -3,7 +3,6 @@
 
 local map = vim.keymap.set
 local fzf = require 'fzf-lua'
-local notify = require 'notify'
 
 -- better up/down
 map({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
@@ -116,6 +115,7 @@ map({ 'n', 'v' }, '<leader>cf', function()
     vim.lsp.buf.format { async = true }
 end, { desc = 'Format' })
 
+map('n', '<leader>ch', ':LspClangdSwitchSourceHeader<cr>', { desc = '[Clangd] Switch Source and Header file' })
 -- diagnostic
 local diagnostic_goto = function(next, severity)
     local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev

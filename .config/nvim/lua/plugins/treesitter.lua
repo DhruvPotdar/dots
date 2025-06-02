@@ -23,7 +23,7 @@ return {
         config = function()
             require('nvim-treesitter.configs').setup {
                 -- Enable syntax highlighting
-                highlight = { enable = true, additional_vim_regex_highlighting = true },
+                highlight = { enable = true, additional_vim_regex_highlighting = false },
                 -- Enable indentation based on treesitter
                 indent = { enable = true },
                 -- Automatically install parsers for listed languages
@@ -41,7 +41,6 @@ return {
                     'markdown',
                     'markdown_inline',
                     'python',
-                    'query',
                     'regex',
                     'toml',
                     'tsx',
@@ -52,7 +51,6 @@ return {
                     'go',
                     'rust',
                     'java',
-                    'sql',
                 },
                 -- Incremental selection configuration
                 incremental_selection = {
@@ -60,7 +58,7 @@ return {
                     keymaps = {
                         init_selection = '<C-space>', -- Start selection
                         node_incremental = '<C-space>', -- Increment to next node
-                        scope_incremental = '<C-s>', -- Increment to scope (function, class)
+                        scope_incremental = false, -- Increment to scope (function, class)
                         node_decremental = '<BS>', -- Decrement selection
                     },
                 },
@@ -160,5 +158,11 @@ return {
             -- Treesitter playground to visualize syntax trees
             { 'nvim-treesitter/playground',                  cmd = 'TSPlaygroundToggle' },
         },
+    },
+    {
+        'folke/ts-comments.nvim',
+        opts = {},
+        event = 'VeryLazy',
+        enabled = vim.fn.has 'nvim-0.10.0' == 1,
     },
 }

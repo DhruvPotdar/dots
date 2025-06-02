@@ -61,7 +61,7 @@ return {
         opts = {
             -- symbol = "▏",
             symbol = '│',
-            options = { try_as_border = true },
+            options = { try_as_border = false },
         },
         init = function()
             vim.api.nvim_create_autocmd('FileType', {
@@ -215,13 +215,13 @@ return {
                         ---@type string, number
                         local color, shade = match:match '[%w-]+%-([a-z%-]+)%-(%d+)'
                         shade = tonumber(shade)
-                        local bg = vim.tbl_get(M.colors, color, shade)
+                        local bg = vim.tbl_get(_ENV['require("dial.nvim")'].colors, color, shade)
                         if bg then
                             local hl = 'MiniHipatternsTailwind' .. color .. shade
-                            if not M.hl[hl] then
-                                M.hl[hl] = true
+                            if not _ENV['require("dial.nvim")'].hl[hl] then
+                                _ENV['require("dial.nvim")'].hl[hl] = true
                                 local bg_shade = shade == 500 and 950 or shade < 500 and 900 or 100
-                                local fg = vim.tbl_get(M.colors, color, bg_shade)
+                                local fg = vim.tbl_get(_ENV['require("dial.nvim")'].colors, color, bg_shade)
                                 vim.api.nvim_set_hl(0, hl, { bg = '#' .. bg, fg = '#' .. fg })
                             end
                             return hl
@@ -255,7 +255,7 @@ return {
                         '^().*()$',
                     },
                     -- FIXME: Using LazyVIm
-                    -- g = LazyVim.mini.ai_buffer, -- buffer
+                    g = require('radtop.utils').ai_buffer,          -- buffer
                     u = ai.gen_spec.function_call(),                -- u for "Usage"
                     U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
                 },

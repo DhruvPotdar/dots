@@ -45,6 +45,7 @@ local M = {
 
         return {
             'default-title',
+            search_mode = 'fuzzy',
             fzf_colors = true,
             fzf_opts = {
                 ['--no-scrollbar'] = true,
