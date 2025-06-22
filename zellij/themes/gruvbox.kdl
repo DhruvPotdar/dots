@@ -1,0 +1,16 @@
+themes {
+	gruvbox {
+		fg "#d4be98"         // light foreground
+		bg "#1b1b1b"         // hard dark background
+		red     "#ea6962"    // red (error)
+		green   "#a9b665"    // green (success)
+		yellow  "#d8a657"    // yellow (warning/info)
+		blue    "#7daea3"    // blue (info)
+		magenta "#d3869b"    // magenta (alt highlights)
+		cyan    "#89b482"    // aqua/cyan (specials)
+		orange  "#e78a4e"    // orange (alt warning/info)
+		black   "#282828"    // background accent
+		white   "#ebdbb2"    // soft white
+	}
+}
+
