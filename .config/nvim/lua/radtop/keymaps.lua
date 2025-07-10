@@ -197,7 +197,7 @@ if vim.fn.executable 'lazygit' == 1 then
 end
 
 map('n', '<leader>gb', function()
-    fzf.git_blame_line()
+    fzf.git_blame()
 end, { desc = 'Git Blame Line' })
 map({ 'n', 'x' }, '<leader>gB', function()
     Snacks.gitbrowse()
@@ -303,5 +303,4 @@ if vim.fn.has 'nvim-0.11' == 0 then
         return vim.snippet.active { direction = -1 } and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
     end, { expr = true, desc = 'Jump Previous' })
 end
-
 return {}
