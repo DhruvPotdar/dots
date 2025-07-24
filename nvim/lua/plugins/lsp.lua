@@ -1,5 +1,6 @@
 local utils = require 'radtop.utils'
 ---@diagnostic disable: undefined-doc-name
+local icons = require 'radtop.icons'
 local M = {
     {
         'neovim/nvim-lspconfig',
@@ -9,21 +10,16 @@ local M = {
                 diagnostics = {
                     underline = true,
                     update_in_insert = false,
-                    -- virtual_text = {
-                    --   spacing = 4,
-                    --   source = "if_many",
-                    --   prefix = "●",
-                    --   -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
-                    --   -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
-                    --   -- prefix = "icons",
-                    -- },
+                    virtual_text = {
+                        current_line = true,
+                    },
                     severity_sort = true,
                     signs = {
                         text = {
-                            -- [vim.diagnostic.severity.ERROR] = utils.icons.diagnostics.Error,
-                            -- [vim.diagnostic.severity.WARN] = utils.icons.diagnostics.Warn,
-                            -- [vim.diagnostic.severity.HINT] = utils.icons.diagnostics.Hint,
-                            -- [vim.diagnostic.severity.INFO] = utils.icons.diagnostics.Info,
+                            [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+                            [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
+                            [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+                            [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
                         },
                     },
                 },
@@ -32,7 +28,6 @@ local M = {
                 -- provide the inlay hints.
                 inlay_hints = {
                     enabled = true,
-                    exclude = { 'vue' }, -- filetypes for which you don't want to enable inlay hints
                 },
                 -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
                 -- Be aware that you also will need to properly configure your LSP server to
@@ -104,7 +99,7 @@ local M = {
             if type(opts.diagnostics.virtual_text) == 'table' and opts.diagnostics.virtual_text.prefix == 'icons' then
                 opts.diagnostics.virtual_text.prefix = vim.fn.has 'nvim-0.10.0' == 0 and '●'
                     or function(diagnostic)
-                        local icons = utils.icons.diagnostics
+                        local icons = icons.diagnostics
                         for d, icon in pairs(icons) do
                             if diagnostic.severity == vim.diagnostic.severity[d:upper()] then
                                 return icon
@@ -274,7 +269,7 @@ local M = {
                                 else
                                     vim.schedule(function()
                                         vim.notify(
-                                        'Failed to install pylsp plugins:\n' .. table.concat(j:stderr_result(), '\n'),
+                                            'Failed to install pylsp plugins:\n' .. table.concat(j:stderr_result(), '\n'),
                                             vim.log.levels.ERROR, { title = 'Mason pylsp' })
                                     end)
                                 end
@@ -288,8 +283,10 @@ local M = {
                     cmd = {
                         'clangd',
                         '--background-index',
+                        '--function-arg-placeholders=1',
+                        '--background-index-priority=normal',
                         '--clang-tidy',
-                        '--completion-style=bundled',
+                        '--completion-style=detailed',
                         '--cross-file-rename',
                         '--header-insertion=iwyu',
                     },
@@ -302,7 +299,7 @@ local M = {
                                 typeCheckingMode = 'standard', -- Can be "off", "basic", or "strict" (adjust based on your needs)
 
                                 -- Limit diagnostics to open files only to reduce clutter
-                                diagnosticMode = 'openFilesOnly', -- Only check open files for issues
+                                -- diagnosticMode = 'workspace',
 
                                 -- Avoid errors about missing type stubs, but you can choose to show warnings for them if needed
                                 reportMissingTypeStubs = 'none', -- "none", "warning", or "error"

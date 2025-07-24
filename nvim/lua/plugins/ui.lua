@@ -30,7 +30,7 @@ return {
                 diagnostics_indicator = function(_, _, diag)
                     local icons = require 'radtop.icons'
                     local ret = (diag.error and icons.diagnostics.Error .. diag.error .. ' ' or '') ..
-                    (diag.warning and icons.diagnostics.Warn .. diag.warning or '')
+                        (diag.warning and icons.diagnostics.Warn .. diag.warning or '')
                     return vim.trim(ret)
                 end,
                 offsets = {
@@ -603,7 +603,7 @@ return {
                             end,
                             padding = { left = 0, right = 0 },
                             color = function()
-                                return { fg = Snacks.util.color 'Constant' }
+                                return { fg = '#ff00ff' }
                             end,
                             fmt = function(str)
                                 return add_width(str, 'recording')
@@ -696,10 +696,25 @@ return {
 
                     lualine_y = {},
                     lualine_z = {
-                        function()
-                            local mode = vim.api.nvim_get_mode()['mode']
-                            return '' .. string.format('%-1s', mode)
-                        end,
+                        {
+                            function()
+                                local lnum, col = unpack(vim.api.nvim_win_get_cursor(0))
+                                local max_lnum = vim.api.nvim_buf_line_count(0)
+
+                                local ruler
+                                if lnum == 1 then
+                                    ruler = 'TOP'
+                                elseif lnum == max_lnum then
+                                    ruler = 'BOT'
+                                else
+                                    ruler = string.format('%2d%%%%', math.floor(100 * lnum / max_lnum))
+                                end
+
+                                return '' .. lnum .. '' .. ruler
+                            end,
+                            icon = '',
+                            padding = { left = 1, right = 1 },
+                        },
                     },
                 },
                 inactive_sections = {

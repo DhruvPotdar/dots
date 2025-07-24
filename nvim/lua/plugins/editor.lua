@@ -351,25 +351,23 @@ return {
 
             return {
                 dials_by_ft = {
-                    css = 'css',
-                    vue = 'vue',
-                    javascript = 'typescript',
-                    typescript = 'typescript',
-                    typescriptreact = 'typescript',
-                    javascriptreact = 'typescript',
+                    -- css = 'css',
+                    -- vue = 'vue',
+                    -- javascript = 'typescript',
+                    -- typescript = 'typescript',
+                    -- typescriptreact = 'typescript',
+                    -- javascriptreact = 'typescript',
                     json = 'json',
                     lua = 'lua',
                     markdown = 'markdown',
-                    sass = 'css',
-                    scss = 'css',
                     python = 'python',
                 },
                 groups = {
                     default = {
-                        augend.integer.alias.decimal, -- nonnegative decimal number (0, 1, 2, 3, ...)
+                        augend.integer.alias.decimal,     -- nonnegative decimal number (0, 1, 2, 3, ...)
                         augend.integer.alias.decimal_int, -- nonnegative and negative decimal number
-                        augend.integer.alias.hex, -- nonnegative hex number  (0x01, 0x1a1f, etc.)
-                        augend.date.alias['%Y/%m/%d'], -- date (2022/02/19, etc.)
+                        augend.integer.alias.hex,         -- nonnegative hex number  (0x01, 0x1a1f, etc.)
+                        augend.date.alias['%Y/%m/%d'],    -- date (2022/02/19, etc.)
                         ordinal_numbers,
                         weekdays,
                         months,
@@ -407,7 +405,7 @@ return {
                     lua = {
                         augend.constant.new {
                             elements = { 'and', 'or' },
-                            word = true, -- if false, "sand" is incremented into "sor", "doctor" into "doctand", etc.
+                            word = true,   -- if false, "sand" is incremented into "sor", "doctor" into "doctand", etc.
                             cyclic = true, -- "or" is incremented into "and".
                         },
                     },
@@ -487,4 +485,4 @@ return {
             require('quicker').setup(opts)
         end,
     },
-}
+    { 'kevinhwang91/nvim-bqf' }, }
