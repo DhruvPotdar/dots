@@ -1,403 +1,163 @@
+-- init.lua or plugins/lsp.lua
+
 local utils = require 'radtop.utils'
----@diagnostic disable: undefined-doc-name
 local icons = require 'radtop.icons'
-local M = {
-    {
-        'neovim/nvim-lspconfig',
-        event = { 'BufReadPre', 'BufNewFile' },
-        opts = function()
-            local ret = {
-                diagnostics = {
-                    underline = true,
-                    update_in_insert = false,
-                    virtual_text = {
-                        current_line = true,
-                    },
-                    severity_sort = true,
-                    signs = {
-                        text = {
-                            [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
-                            [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
-                            [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
-                            [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
-                        },
-                    },
-                },
-                -- Enable this to enable the builtin LSP inlay hints on Neovim >= 0.10.0
-                -- Be aware that you also will need to properly configure your LSP server to
-                -- provide the inlay hints.
-                inlay_hints = {
-                    enabled = true,
-                },
-                -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
-                -- Be aware that you also will need to properly configure your LSP server to
-                -- provide the code lenses.
-                codelens = {
-                    enabled = true,
-                },
-                -- add any global capabilities here
-                capabilities = {
-                    workspace = {
-                        fileOperations = {
-                            didRename = true,
-                            willRename = true,
-                        },
-                    },
-                },
-                -- LSP Server Settings
-                ---@type lspconfig.options
-                servers = {
-                    lua_ls = {
-                        -- mason = false, -- set to false if you don't want this server to be installed with mason
-                        -- Use this to add any additional keymaps
-                        -- for specific lsp servers
-                        -- ---@type LazyKeysSpec[]
-                        -- keys = {},
-                        settings = {
-                            Lua = {
-                                workspace = {
-                                    checkThirdParty = false,
-                                },
-                                codeLens = {
-                                    enable = true,
-                                },
-                                completion = {
-                                    callSnippet = 'Replace',
-                                },
-                                doc = {
-                                    privateName = { '^_' },
-                                },
-                                hint = {
-                                    enable = true,
-                                    setType = false,
-                                    paramType = true,
-                                    paramName = 'Disable',
-                                    semicolon = 'Disable',
-                                    arrayIndex = 'Disable',
-                                },
-                            },
-                        },
-                    },
-                },
 
-                setup = {},
-            }
-            return ret
-        end,
-        config = function(_, opts)
-            -- diagnostics signs
-            if vim.fn.has 'nvim-0.10.0' == 0 then
-                if type(opts.diagnostics.signs) ~= 'boolean' then
-                    for severity, icon in pairs(opts.diagnostics.signs.text) do
-                        local name = vim.diagnostic.severity[severity]:lower():gsub('^%l', string.upper)
-                        name = 'DiagnosticSign' .. name
-                        vim.fn.sign_define(name, { text = icon, texthl = name, numhl = '' })
-                    end
-                end
-            end
-
-            if type(opts.diagnostics.virtual_text) == 'table' and opts.diagnostics.virtual_text.prefix == 'icons' then
-                opts.diagnostics.virtual_text.prefix = vim.fn.has 'nvim-0.10.0' == 0 and '●'
-                    or function(diagnostic)
-                        local icons = icons.diagnostics
-                        for d, icon in pairs(icons) do
-                            if diagnostic.severity == vim.diagnostic.severity[d:upper()] then
-                                return icon
-                            end
-                        end
-                    end
-            end
-
-            vim.diagnostic.config(vim.deepcopy(opts.diagnostics))
-
-            local servers = opts.servers
-            local has_cmp, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
-            local has_blink, blink = pcall(require, 'blink.cmp')
-            local capabilities = vim.tbl_deep_extend(
-                'force',
-                {},
-                vim.lsp.protocol.make_client_capabilities(),
-                has_cmp and cmp_nvim_lsp.default_capabilities() or {},
-                has_blink and blink.get_lsp_capabilities() or {},
-                opts.capabilities or {}
-            )
-
-            local function setup(server)
-                local server_opts = vim.tbl_deep_extend('force', {
-                    capabilities = vim.deepcopy(capabilities),
-                }, servers[server] or {})
-                if server_opts.enabled == false then
-                    return
-                end
-
-                if opts.setup[server] then
-                    if opts.setup[server](server, server_opts) then
-                        return
-                    end
-                elseif opts.setup['*'] then
-                    if opts.setup['*'](server, server_opts) then
-                        return
-                    end
-                end
-                require('lspconfig')[server].setup(server_opts)
-            end
-
-            -- get all the servers that are available through mason-lspconfig
-            local have_mason, mlsp = pcall(require, 'mason-lspconfig')
-            local all_mslp_servers = {}
-            if have_mason then
-                all_mslp_servers = require('mason-lspconfig').get_mappings().lspconfig_to_package
-            end
-
-            local ensure_installed = {} ---@type string[]
-            for server, server_opts in pairs(servers) do
-                if server_opts then
-                    server_opts = server_opts == true and {} or server_opts
-                    if server_opts.enabled ~= false then
-                        -- run manual setup if mason=false or if this is a server that cannot be installed with mason-lspconfig
-                        if server_opts.mason == false or not vim.tbl_contains(all_mslp_servers, server) then
-                            setup(server)
-                        else
-                            ensure_installed[#ensure_installed + 1] = server
-                        end
-                    end
-                end
-            end
-
-            if have_mason then
-                mlsp.setup {
-                    ensure_installed = vim.tbl_deep_extend('force', ensure_installed, utils.opts('mason-lspconfig.nvim').ensure_installed or {}),
-                    handlers = { setup },
-                }
-            end
-        end,
+return {
+  {
+    'neovim/nvim-lspconfig',
+    event = { 'BufReadPre', 'BufNewFile' },
+    dependencies = {
+      'williamboman/mason.nvim',
+      'williamboman/mason-lspconfig.nvim',
+      'nvim-lua/plenary.nvim',
+      'nvimtools/none-ls.nvim',
     },
-    {
-        'stevearc/conform.nvim',
-        event = { 'BufWritePre' },
-        cmd = { 'ConformInfo' },
-        keys = {
-            {
-                '<leader>cf',
-                function()
-                    require('mini.trailspace').trim()
-                    require('mini.trailspace').trim_last_lines()
-                    require('conform').format { async = true }
-                end,
-                mode = '',
-                desc = 'Format buffer',
+    opts = function()
+      return {
+        diagnostics = {
+          underline = false,
+          update_in_insert = false,
+          virtual_text = { current_line = true },
+          severity_sort = true,
+          signs = {
+            text = {
+              [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+              [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
+              [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+              [vim.diagnostic.severity.INFO] = icons.diagnostics.Info,
             },
+          },
         },
-        ---@module "conform"
-        ---@type conform.setupOpts
-        opts = {
-            -- Define your formatters
-            formatters_by_ft = {
-                lua = { 'stylua' },
-                python = { 'black', 'ruff_format' },
-                cpp = { 'clang-format' },
-            },
-            default_format_opts = {
-                lsp_format = 'fallback',
-            },
-            ignore_errors = true,
+        inlay_hints = { enabled = true },
+        codelens = { enabled = true },
+        capabilities = {
+          workspace = { fileOperations = { didRename = true, willRename = true } },
         },
-        init = function()
-            vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+        servers = {
+          lua_ls = {
+            settings = {
+              Lua = {
+                workspace = { checkThirdParty = false },
+                codeLens = { enable = true },
+                completion = { callSnippet = 'Replace' },
+                doc = { privateName = { '^_' } },
+                hint = {
+                  enable = true,
+                  setType = false,
+                  paramType = true,
+                  paramName = 'Disable',
+                  semicolon = 'Disable',
+                  arrayIndex = 'Disable',
+                },
+              },
+            },
+          },
+          basedpyright = {
+            settings = {
+              basedpyright = {
+                analysis = {
+                  typeCheckingMode = 'standard', -- Can be "off", "basic", or "strict" (adjust based on your needs)
+                  reportMissingTypeStubs = 'none', -- "none", "warning", or "error"
+                  reportUnusedCallResult = 'warning', -- "none", "warning", "error"
+                  reportUnknownType = 'warning', -- "none", "warning", or "error"
+                  reportUnknownMemberType = 'none', -- Ensure we're not referencing members with unknown types
+                  reportMissingFunctionType = 'warning', -- Warn when function types are missing
+                  reportMissingVariableType = 'warning', -- Ensure variables are typed
+                  reportUnusedVariable = 'warning', -- Warn about unused variables, but don't be overly strict
+                  stubPath = { './typings', './stubs' }, -- Adjust paths to stubs if necessary
+                  reportInconsistentReturnType = 'warning', -- Ensure consistent return types across functions
+                  maxNumberOfProblems = 100, -- Limit the number of diagnostics shown (can adjust based on your preference)
+                  inlay_hints = {
+                    generic_tfalseyped = true,
+                  },
+                },
+              },
+            },
+          },
+          clangd = {
+            cmd = {
+              'clangd',
+              '--background-index',
+              '--function-arg-placeholders=1',
+              '--background-index',
+              '--background-index-priority=normal',
+              '--clang-tidy',
+              '--completion-style=detailed',
+              '--cross-file-rename',
+              '--header-insertion=iwyu',
+              '--header-insertion-decorators',
+              '--enable-config',
+              '--j 8',
+              '--malloc-trim',
+              '--pch-storage=memory',
+            },
+          },
+        },
+      }
+    end,
+
+    config = function(_, opts)
+      if vim.fn.has 'nvim-0.10.0' == 0 then
+        for sev, icon in pairs(opts.diagnostics.signs.text) do
+          local name = 'DiagnosticSign' .. vim.diagnostic.severity[sev]:lower():gsub('^%l', string.upper)
+          vim.fn.sign_define(name, { text = icon, texthl = name })
+        end
+      end
+
+      vim.diagnostic.config(vim.deepcopy(opts.diagnostics))
+
+      require('mason').setup { ui = { border = 'rounded' } }
+      require('mason-lspconfig').setup {
+        ensure_installed = vim.tbl_keys(opts.servers),
+        handlers = {
+          function(server)
+            local cfg = vim.tbl_deep_extend('force', { capabilities = vim.lsp.protocol.make_client_capabilities() }, opts.servers[server] or {})
+            require('lspconfig')[server].setup(cfg)
+          end,
+        },
+      }
+
+      local caps = vim.tbl_deep_extend(
+        'force',
+        vim.lsp.protocol.make_client_capabilities(),
+        (pcall(require, 'cmp_nvim_lsp') and require('cmp_nvim_lsp').default_capabilities() or {}),
+        (pcall(require, 'blink.cmp') and require('blink.cmp').get_lsp_capabilities() or {}),
+        opts.capabilities or {}
+      )
+
+      local function on_attach(client, bufnr)
+        if client.name == 'clangd' or client.name == 'basedpyright' then
+          client.server_capabilities.documentFormattingProvider = true
+        end
+      end
+
+      for srv, srv_opts in pairs(opts.servers) do
+        local cfg = vim.tbl_deep_extend('force', { capabilities = caps, on_attach = on_attach }, srv_opts or {})
+        require('lspconfig')[srv].setup(cfg)
+      end
+
+      local null_ls = require 'null-ls'
+      null_ls.setup {
+        debug = false,
+        sources = {
+          null_ls.builtins.formatting.black.with { extra_args = { '--fast' } },
+          null_ls.builtins.formatting.isort.with { extra_args = { '--profile', 'black' } },
+          -- null_ls.builtins.diagnostics.ruff,
+          null_ls.builtins.formatting.clang_format.with { extra_args = { '--style=file' } },
+        },
+        on_attach = function(client, bufnr)
+          -- vim.api.nvim_clear_autocmds { group = 'LspFormatting', buffer = bufnr }
+          vim.api.nvim_create_augroup('LspFormatting', {})
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            group = 'LspFormatting',
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format { bufnr = bufnr }
+            end,
+          })
         end,
-    },
-    {
-        'williamboman/mason.nvim',
-        cmd = { 'Mason', 'MasonInstall', 'MasonUninstall', 'MasonLog', 'MasonUpdate' },
-        opts = {
-            ui = {
-                border = 'rounded',
-            },
-        },
-    },
-    {
-        'williamboman/mason-lspconfig.nvim',
-        event = { 'BufReadPre', 'BufNewFile' },
-        dependencies = {
-            {
-                'williamboman/mason.nvim',
-                'neovim/nvim-lspconfig',
-                'nvim-lua/plenary.nvim',
-            },
-        },
-        opts = {
-
-            ensure_installed = { 'lua_ls', 'clangd', 'basedpyright', 'ruff' },
-            automatic_installation = { exclude = 'rust_analyzer' },
-        },
-        config = function()
-            require('mason').setup()
-            require('mason-lspconfig').setup {}
-            local pyl = 'python-lsp-server'
-            local opts = utils.opts 'mason-lspconfig'
-            if opts.ensure_installed and vim.tbl_contains(opts.ensure_installed, pyl) then
-                local pylsp = require('mason-registry').get_package 'python-lsp-server'
-                pylsp:on('install:success', function()
-                    local function mason_package_path(package)
-                        local path = vim.fn.resolve(vim.fn.stdpath 'data' .. '/mason/packages/' .. package)
-                        return path
-                    end
-
-                    local path = mason_package_path 'python-lsp-server'
-                    local command = path .. '/venv/bin/pip'
-                    local args = {
-                        'install',
-                        '-U',
-                        'pylsp-rope',
-                        'python-lsp-black',
-                        'python-lsp-isort',
-                        'python-lsp-ruff',
-                        'pylsp-mypy',
-                    }
-
-                    require('plenary.job')
-                        :new({
-                            command = command,
-                            args = args,
-                            cwd = path,
-                            on_exit = function(j, return_val)
-                                if return_val == 0 then
-                                    vim.schedule(function()
-                                        vim.notify('pylsp plugins installed successfully!', vim.log.levels.INFO,
-                                            { title = 'Mason pylsp' })
-                                    end)
-                                else
-                                    vim.schedule(function()
-                                        vim.notify(
-                                            'Failed to install pylsp plugins:\n' .. table.concat(j:stderr_result(), '\n'),
-                                            vim.log.levels.ERROR, { title = 'Mason pylsp' })
-                                    end)
-                                end
-                            end,
-                        })
-                        :start()
-                end)
-            end
-            local server_config = {
-                clangd = {
-                    cmd = {
-                        'clangd',
-                        '--background-index',
-                        '--function-arg-placeholders=1',
-                        '--background-index-priority=normal',
-                        '--clang-tidy',
-                        '--completion-style=detailed',
-                        '--cross-file-rename',
-                        '--header-insertion=iwyu',
-                    },
-                },
-                basedpyright = {
-                    settings = {
-                        basedpyright = {
-                            analysis = {
-                                -- Enforcing basic type checking without being too strict
-                                typeCheckingMode = 'standard', -- Can be "off", "basic", or "strict" (adjust based on your needs)
-
-                                -- Limit diagnostics to open files only to reduce clutter
-                                -- diagnosticMode = 'workspace',
-
-                                -- Avoid errors about missing type stubs, but you can choose to show warnings for them if needed
-                                reportMissingTypeStubs = 'none', -- "none", "warning", or "error"
-
-                                -- Avoid too many warnings about unused call results, but report them as a warning
-                                reportUnusedCallResult = 'warning', -- "none", "warning", "error"
-
-                                -- Suppress unknown type errors but allow warnings for potentially problematic code
-                                reportUnknownType = 'warning', -- "none", "warning", or "error"
-
-                                -- Suggesting a good coding practice: avoid unknown members on dynamic types
-                                reportUnknownMemberType = 'none', -- Ensure we're not referencing members with unknown types
-
-                                -- Enforcing type annotations for functions and methods for better type safety
-                                reportMissingFunctionType = 'warning', -- Warn when function types are missing
-
-                                -- Enforce variable type annotations for better clarity
-                                reportMissingVariableType = 'warning', -- Ensure variables are typed
-                                reportAssignmentType = 'none',
-
-                                -- Suppress false positives for non-essential diagnostics, but show important ones
-                                reportUnusedVariable = 'warning', -- Warn about unused variables, but don't be overly strict
-
-                                -- Use stub files for packages if necessary to improve type safety
-                                stubPath = { './typings', './stubs' }, -- Adjust paths to stubs if necessary
-
-                                -- Enforce a clear, maintainable code style by checking for type mismatches
-                                reportInconsistentReturnType = 'warning', -- Ensure consistent return types across functions
-
-                                -- Optionally, set max number of diagnostics to avoid overwhelming the screen
-                                maxNumberOfProblems = 100, -- Limit the number of diagnostics shown (can adjust based on your preference)
-
-                                inlay_hints = {
-                                    generic_tfalseyped = true,
-                                },
-                            },
-                        },
-                    },
-                },
-                ruff = {
-                    init_options = {
-                        show_syntax_errors = false,
-                        settings = {
-                            -- Server settings should go here
-                            line_length = 100,
-                            disableRuleComment = {
-                                enable = false,
-                            },
-                            format = {
-                                preview = true,
-                            },
-                        },
-                    },
-                    handlers = {
-                        ['textDocument/publishDiagnostics'] = function() end, -- Ignore diagnostics from Ruff
-                    },
-                },
-                pylsp = {
-                    settings = {
-                        pylsp = {
-                            plugins = {
-                                ruff = { enabled = true },
-                                rope = { enabled = true },
-                                pycodestyle = { enabled = false },
-                                mccabe = { enabled = false },
-                                pyflakes = { enabled = false },
-                                yapf = { enabled = false },
-                                autopep8 = { enabled = false },
-                                black = { enabled = false },
-                                isort = { enabled = false },
-                                mypy = { enabled = false },
-                            },
-                        },
-                    },
-                },
-            }
-            local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-            function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-                opts = opts or {}
-                opts.border = opts.border or 'rounded'
-                return orig_util_open_floating_preview(contents, syntax, opts, ...)
-            end
-
-            vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-                border = 'rounded',
-                focusable = false,
-                silent = true,
-                max_height = 7,
-            })
-            vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics,
-                {
-                    virtual_text = true,
-                })
-            for server, conf in pairs(server_config) do
-                vim.lsp.config(server, conf)
-            end
-        end,
-    },
+      }
+    end,
+  },
 }
-
-return M

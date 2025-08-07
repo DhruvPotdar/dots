@@ -135,12 +135,12 @@ vim.api.nvim_create_autocmd('CursorMoved', {
     end,
 })
 -- Conform Format on Save
-vim.api.nvim_create_autocmd('BufWritePre', {
-    pattern = '*',
-    callback = function(args)
-        require('conform').format { bufnr = args.buf }
-    end,
-})
+-- vim.api.nvim_create_autocmd('BufWritePre', {
+--     pattern = '*',
+--     callback = function(args)
+--         require('conform').format { bufnr = args.buf }
+--     end,
+-- })
 
 -- This function gets run when an LSP attaches to a particular buffer.
 --    That is to say, every time a new file is opened that is associated with
