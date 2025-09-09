@@ -101,5 +101,5 @@ vim.g.markdown_recommended_style = 0
 -- Remove the hidden buffer
 opt.hidden = false
 
--- Borderb
+-- Border
 opt.winborder = 'none'
