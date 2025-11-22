@@ -1,0 +1,15 @@
+themes {
+    yorumi {
+        fg "#a7a9b5"
+        bg "#878996"
+        red "#ff3535"
+        green "#a188c3"
+        yellow "#d6b476"
+        blue "#59c2ff"
+        magenta "#968ebe"
+        orange "#f2ab59"
+        cyan "#85c7b8"
+        black "#0d1017"
+        white "#a7a9b5"
+    }
+	}
