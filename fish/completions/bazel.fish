@@ -1,1 +1,0 @@
-/home/dhruvpotdar/.bazel/bin/bazel.fish

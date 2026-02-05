@@ -1,13 +1,9 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
+SETUVAR --export BROWSER:zen\x2dbrowser
 SETUVAR --export EDITOR:nvim
 SETUVAR --export PAGER:bat
-SETUVAR __fish_initialized:3800
-SETUVAR _fisher_acomagu_2F_fish_2D_async_2D_prompt_files:\x7e/\x2econfig/fish/conf\x2ed/__async_prompt\x2efish
-SETUVAR _fisher_edc_2F_bass_files:\x7e/\x2econfig/fish/functions/__bass\x2epy\x1e\x7e/\x2econfig/fish/functions/bass\x2efish
-SETUVAR _fisher_jorgebucaran_2F_fisher_files:\x7e/\x2econfig/fish/functions/fisher\x2efish\x1e\x7e/\x2econfig/fish/completions/fisher\x2efish
-SETUVAR _fisher_nickeb96_2F_puffer_2D_fish_files:\x7e/\x2econfig/fish/functions/_puffer_fish_expand_bang\x2efish\x1e\x7e/\x2econfig/fish/functions/_puffer_fish_expand_dots\x2efish\x1e\x7e/\x2econfig/fish/functions/_puffer_fish_expand_lastarg\x2efish\x1e\x7e/\x2econfig/fish/conf\x2ed/puffer_fish_key_bindings\x2efish
-SETUVAR _fisher_plugins:jorgebucaran/fisher\x1eacomagu/fish\x2dasync\x2dprompt\x1enickeb96/puffer\x2dfish\x1eedc/bass
+SETUVAR __fish_initialized:3400
 SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR fish_color_autosuggestion:4c566a
 SETUVAR fish_color_cancel:\x2d\x2dreverse
@@ -34,7 +30,7 @@ SETUVAR fish_color_selection:d8dee9\x1e\x2d\x2dbold\x1e\x2d\x2dbackground\x3d434
 SETUVAR fish_color_status:bf616a
 SETUVAR fish_color_user:a3be8c
 SETUVAR fish_color_valid_path:\x2d\x2dunderline
-SETUVAR fish_key_bindings:fish_default_key_bindings
+SETUVAR fish_key_bindings:fish_vi_key_bindings
 SETUVAR fish_pager_color_background:\x1d
 SETUVAR fish_pager_color_completion:e5e9f0
 SETUVAR fish_pager_color_description:ebcb8b\x1e\x2d\x2ditalics
@@ -48,3 +44,4 @@ SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3d434c5e
 SETUVAR fish_pager_color_selected_completion:\x1d
 SETUVAR fish_pager_color_selected_description:\x1d
 SETUVAR fish_pager_color_selected_prefix:\x1d
+SETUVAR fish_user_paths:/home/dhruvpotdar/\x2elocal/share/bob/nvim\x2dbin\x1e/home/dhruvpotdar/\x2efzf/bin\x1e/home/dhruvpotdar/\x2ecargo/bin\x1e/home/dhruvpotdar/\x2eopencode/bin

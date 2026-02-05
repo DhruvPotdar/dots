@@ -52,9 +52,9 @@ return {
     formatters = {
       ['clang-format'] = { prepend_args = { '--style=file', '--fallback-style=LLVM' } },
       black = {
-        -- prepend_args = { '--line-length', '88' }
+        prepend_args = { '--line-length', '88' },
       },
-      prettier = { prepend_args = { '--tab-width', '2', '--single-quote' } },
+      prettier = { prepend_args = { '--tab-width', '4', '--single-quote' } },
       shfmt = { prepend_args = { '-i', '2', '-ci' } },
     },
   },

@@ -1,14 +1,23 @@
+local function ai_buffer(ai_type)
+  local start_line, end_line = 1, vim.fn.line '$'
+  if ai_type == 'i' then
+    -- Skip first and last blank lines for `i` textobject
+    local first_nonblank, last_nonblank = vim.fn.nextnonblank(start_line), vim.fn.prevnonblank(end_line)
+    -- Do nothing for buffer with all blanks
+    if first_nonblank == 0 or last_nonblank == 0 then
+      return { from = { line = start_line, col = 1 } }
+    end
+    start_line, end_line = first_nonblank, last_nonblank
+  end
+
+  local to_col = math.max(vim.fn.getline(end_line):len(), 1)
+  return { from = { line = start_line, col = 1 }, to = { line = end_line, col = to_col } }
+end
+
 return {
   {
     'nvim-mini/mini.comment',
     event = 'VeryLazy',
-    opts = {
-      options = {
-        custom_commentstring = function()
-          return require('ts_context_commentstring.internal').calculate_commentstring() or vim.bo.commentstring
-        end,
-      },
-    },
   },
 
   {
@@ -178,27 +187,6 @@ return {
     opts = function()
       local hi = require 'mini.hipatterns'
       return {
-        -- custom LazyVim option to enable the tailwind integration
-        tailwind = {
-          enabled = true,
-          ft = {
-            'astro',
-            'css',
-            'heex',
-            'html',
-            'html-eex',
-            'javascript',
-            'javascriptreact',
-            'rust',
-            'svelte',
-            'typescript',
-            'typescriptreact',
-            'vue',
-          },
-          -- full: the whole css class will be highlighted
-          -- compact: only the color will be highlighted
-          style = 'full',
-        },
         highlighters = {
           hex_color = hi.gen_highlighter.hex_color { priority = 2000 },
           shorthand = {
@@ -256,48 +244,41 @@ return {
           extmark_opts = { priority = 2000 },
         }
       end
-      require('mini.hipatterns').setup(opts)
     end,
   },
+  -- Better text objects
   {
-    'nvim-mini/mini.ai',
+    'echasnovski/mini.ai',
     event = 'VeryLazy',
     opts = function()
       local ai = require 'mini.ai'
       return {
         n_lines = 500,
-        -- TODO: Which Key add keymaps
         custom_textobjects = {
-          o = ai.gen_spec.treesitter { -- code block
+          o = ai.gen_spec.treesitter {
             a = { '@block.outer', '@conditional.outer', '@loop.outer' },
             i = { '@block.inner', '@conditional.inner', '@loop.inner' },
           },
-          f = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' }, -- function
-          c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' }, -- class
-          t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' }, -- tags
+          f = ai.gen_spec.treesitter { a = '@function.outer', i = '@function.inner' },
+          c = ai.gen_spec.treesitter { a = '@class.outer', i = '@class.inner' },
+          t = { '<([%p%w]-)%f[^<%w][^<>]->.-</%1>', '^<.->().*()</[^/]->$' },
           d = { '%f[%d]%d+' }, -- digits
           e = { -- Word with case
             { '%u[%l%d]+%f[^%l%d]', '%f[%S][%l%d]+%f[^%l%d]', '%f[%P][%l%d]+%f[^%l%d]', '^[%l%d]+%f[^%l%d]' },
             '^().*()$',
           },
-          -- FIXME: Using LazyVIm
-          g = require('radtop.utils').ai_buffer, -- buffer
+          g = function() -- Whole buffer, similar to `gg` and 'G' motion
+            local from = { line = 1, col = 1 }
+            local to = {
+              line = vim.fn.line '$',
+              col = math.max(vim.fn.getline('$'):len(), 1),
+            }
+            return { from = from, to = to }
+          end,
           u = ai.gen_spec.function_call(), -- u for "Usage"
           U = ai.gen_spec.function_call { name_pattern = '[%w_]' }, -- without dot in function name
         },
       }
-    end,
-    config = function(_, opts)
-      require('mini.ai').setup(opts)
-      -- If you need to integrate with which-key after it's loaded:
-      local wk_avail, which_key = pcall(require, 'which-key')
-      if wk_avail then
-        -- Place your which-key integration logic here
-        -- For example, register custom mappings for mini.ai
-        which_key.add {
-          -- Define your which-key mappings for mini.ai here
-        }
-      end
     end,
   },
 }

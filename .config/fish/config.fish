@@ -4,12 +4,19 @@ if status is-interactive
 end
 
 alias ls 'eza  --icons always '
+alias lm 'eza  --icons always ~ | grep mule'
 alias l 'eza  --icons always'
 alias ll 'eza  -la --icons always'
 alias c clear
+alias cat bat
+# alias btop 'btop --force-utf'
 abbr fconf 'nvim ~/.config/fish/config.fish'
-abbr dbh 'distrobox enter humble'
-abbr dbn 'distrobox enter noetic'
+# abbr dbr 'distrobox enter ros'
+# abbr dba 'distrobox enter ati'
+
+set -gx EDITOR nvim
+set -x MANPAGER "nvim +Man!"
+set -x MANWIDTH 999
 
 if test "$ZELLIJ" = 0
     function cls
@@ -21,44 +28,35 @@ else
     end
 end
 
-starship init fish | source
-# =============== ROS Stuff ===============
-if test "$HOME" = /home/radtop/ros1
-    # ROS
-    source /opt/ros/noetic/share/rosbash/rosfish
-    bass source /opt/ros/noetic/setup.bash
-    set -x ROS_MASTER_URI 'http://radtop:11311'
-    set -x ROS_HOSTNAME radtop
-    set -x CATKIN_SHELL bash
-    set -x TURTLEBOT3_MODEL waffle
-    ulimit -Sn 1024
-    ulimit -Hn 524288
-    alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
-    abbr cb "colcon build"
-else if test "$ROS_DISTRO" = humble
-    # ROS
-    bass source /opt/ros/humble/setup.bash
-    # bass source ~/wheelchair_ws/devel/setup.bash
-    set -x ROS_MASTER_URI 'http://radtop:11311'
-    set -x ROS_DOMAIN_ID 69
-    set -x ROS_LOCALHOST_ONLY 1
-    set -x ROS_HOSTNAME radtop
-    set -x TURTLEBOT3_MODEL waffle
-    ulimit -Sn 1024
-    ulimit -Hn 524288
-    abbr cb "colcon build"
-    alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
-else
-    alias cat bat
-    enable_transience
+abbr gs "git status"
+
+abbr ati "cd ~/mule && bass source ~/mule/env.dev.sh"
+abbr viz "cd ~/mule && bass source ~/mule/env.dev.sh && cd ati/schema; protoc --python_out=. messages.proto; cd ~/data && streamlit run ~/mule/ati/tools/visualizer/visualizer.py"
+
+
+function gl
+    git log --graph --date=relative \
+        --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %C(dim white)- %an, %ar'
 end
 
-# Zoxide settings
+function ros
+    # ROS
+    bass source /opt/ros/humble/setup.bash
+    set -gx QT_QPA_PLATFORM xcb
+    set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
+    set -x ROS_DOMAIN_ID 69
+    set -x ROS_LOCALHOST_ONLY 1
+    # set -x ROS_HOSTNAME dhruvpotdar
+    # ulimit -Sn 1024
+    # ulimit -Hn 524288
+    abbr cb "colcon build"
+    alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
+end
+
+# Sourcing apps 
 zoxide init fish | source
-
-# completion/suggestion init
-# cod init $fish_pid fish | source
-carapace _carapace | source
-
-# atuin
 atuin init fish | source
+starship init fish | source
+
+# opencode
+fish_add_path /home/dhruvpotdar/.opencode/bin

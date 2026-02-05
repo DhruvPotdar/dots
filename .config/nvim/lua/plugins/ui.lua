@@ -113,7 +113,6 @@ return {
   },
   { 'MunifTanjim/nui.nvim', lazy = true },
   { 'nvim-lua/plenary.nvim', lazy = true },
-
   {
 
     {
@@ -248,6 +247,7 @@ return {
 
   {
     'hedyhli/outline.nvim',
+    enabled = false,
     keys = {
       { '<leader>cs', '<cmd>Outline<cr>', desc = 'Toggle Outline' },
     },
@@ -455,11 +455,6 @@ return {
   {
     'Bekaboo/dropbar.nvim',
     event = 'VeryLazy',
-    -- optional, but required for fuzzy finder support
-    dependencies = {
-      'nvim-telescope/telescope-fzf-native.nvim',
-      build = 'make',
-    },
     config = function()
       local dropbar_api = require 'dropbar.api'
       vim.keymap.set('n', '<Leader>;', dropbar_api.pick, { desc = 'Pick symbols in Dropbar' })
@@ -533,9 +528,32 @@ return {
       end
 
       vim.o.laststatus = vim.g.lualine_laststatus
+      local colors = {
+        bg = 'none', -- This makes it transparent
+        fg = '#abb2bf',
+        -- other colors as needed
+      }
+
+      local custom_theme = {
+        normal = {
+          a = { bg = colors.bg, fg = colors.fg },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+        insert = { a = { bg = colors.bg, fg = colors.fg } },
+        visual = { a = { bg = colors.bg, fg = colors.fg } },
+        replace = { a = { bg = colors.bg, fg = colors.fg } },
+        command = { a = { bg = colors.bg, fg = colors.fg } },
+        inactive = {
+          a = { bg = colors.bg, fg = colors.fg },
+          b = { bg = colors.bg, fg = colors.fg },
+          c = { bg = colors.bg, fg = colors.fg },
+        },
+      }
+
       local opts = {
         options = {
-          theme = 'auto',
+          theme = custom_theme,
           component_separators = '',
           section_separators = '',
           globalstatus = true,
@@ -739,6 +757,7 @@ return {
   },
   {
     'gbprod/yanky.nvim',
+    enabled = false,
     recommended = true,
     desc = 'Better Yank/Paste',
     event = 'BufReadPost',

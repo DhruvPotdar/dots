@@ -38,25 +38,24 @@ map('n', ']b', '<cmd>bnext<cr>', { desc = 'Next Buffer' })
 map('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
 map('n', '<leader>`', '<cmd>e #<cr>', { desc = 'Switch to Other Buffer' })
 map('n', '<leader>bd', function()
-    require('snacks').bufdelete()
+  require('snacks').bufdelete()
 end, { desc = 'Delete Buffer' })
 map('n', '<leader>bo', function()
-    require('snacks').bufdelete.other()
+  require('snacks').bufdelete.other()
 end, { desc = 'Delete Other Buffers' })
 map('n', '<leader>bD', '<cmd>:bd<cr>', { desc = 'Delete Buffer and Window' })
 
 -- Clear search and stop snippet on escape
 map({ 'i', 'n', 's' }, '<esc>', function()
-    vim.cmd 'noh'
-    if vim.snippet and vim.snippet.active and vim.snippet.active() then
-        vim.snippet.stop()
-    end
-    return '<esc>'
+  vim.cmd 'noh'
+  if vim.snippet and vim.snippet.active and vim.snippet.active() then
+    vim.snippet.stop()
+  end
+  return '<esc>'
 end, { expr = true, desc = 'Escape and Clear hlsearch' })
 
 -- Clear search, diff update and redraw
-map('n', '<leader>ur', '<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>',
-    { desc = 'Redraw / Clear hlsearch / Diff Update' })
+map('n', '<leader>ur', '<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>', { desc = 'Redraw / Clear hlsearch / Diff Update' })
 
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
 map('n', 'n', "'Nn'[v:searchforward].'zv'", { expr = true, desc = 'Next Search Result' })
@@ -93,18 +92,18 @@ map('n', '<leader>fn', '<cmd>enew<cr>', { desc = 'New File' })
 
 -- location list
 map('n', '<leader>xl', function()
-    local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
-    if not success and err then
-        vim.notify(err, vim.log.levels.ERROR)
-    end
+  local success, err = pcall(vim.fn.getloclist(0, { winid = 0 }).winid ~= 0 and vim.cmd.lclose or vim.cmd.lopen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
 end, { desc = 'Location List' })
 
 -- quickfix list
 map('n', '<leader>xq', function()
-    local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
-    if not success and err then
-        vim.notify(err, vim.log.levels.ERROR)
-    end
+  local success, err = pcall(vim.fn.getqflist({ winid = 0 }).winid ~= 0 and vim.cmd.cclose or vim.cmd.copen)
+  if not success and err then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
 end, { desc = 'Quickfix List' })
 
 map('n', '[q', vim.cmd.cprev, { desc = 'Previous Quickfix' })
@@ -112,17 +111,17 @@ map('n', ']q', vim.cmd.cnext, { desc = 'Next Quickfix' })
 
 -- Formatting
 map({ 'n', 'v' }, '<leader>cf', function()
-    vim.lsp.buf.format { async = true }
+  vim.lsp.buf.format { async = true }
 end, { desc = 'Format' })
 
 map('n', '<leader>ch', ':LspClangdSwitchSourceHeader<cr>', { desc = '[Clangd] Switch Source and Header file' })
 -- diagnostic
 local diagnostic_goto = function(next, severity)
-    local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
-    severity = severity and vim.diagnostic.severity[severity] or nil
-    return function()
-        go { severity = severity }
-    end
+  local go = next and vim.diagnostic.goto_next or vim.diagnostic.goto_prev
+  severity = severity and vim.diagnostic.severity[severity] or nil
+  return function()
+    go { severity = severity }
+  end
 end
 map('n', '<leader>cd', vim.diagnostic.open_float, { desc = 'Line Diagnostics' })
 map('n', ']d', diagnostic_goto(true), { desc = 'Next Diagnostic' })
@@ -137,17 +136,17 @@ local Snacks = require 'snacks'
 
 -- Formatting toggles (Fixed FIXME)
 map('n', 'leader>uf', function()
-    -- Toggle format on save
-    local enabled = not vim.lsp.buf.format()
-    vim.g.format_on_save = enabled
-    vim.notify('Format on save: ' .. (enabled and 'enabled' or 'disabled'))
+  -- Toggle format on save
+  local enabled = not vim.lsp.buf.format()
+  vim.g.format_on_save = enabled
+  vim.notify('Format on save: ' .. (enabled and 'enabled' or 'disabled'))
 end, { desc = 'Toggle Format on Save' })
 
 map('n', '<leader>uF', function()
-    -- Toggle format on save (buffer)
-    local enabled = not vim.b.format_on_save
-    vim.b.format_on_save = enabled
-    vim.notify('Format on save (buffer): ' .. (enabled and 'enabled' or 'disabled'))
+  -- Toggle format on save (buffer)
+  local enabled = not vim.b.format_on_save
+  vim.b.format_on_save = enabled
+  vim.notify('Format on save (buffer): ' .. (enabled and 'enabled' or 'disabled'))
 end, { desc = 'Toggle Format on Save (Buffer)' })
 
 Snacks.toggle.option('spell', { name = 'Spelling' }):map '<leader>us'
@@ -155,10 +154,8 @@ Snacks.toggle.option('wrap', { name = 'Wrap' }):map '<leader>uw'
 Snacks.toggle.option('relativenumber', { name = 'Relative Number' }):map '<leader>uL'
 Snacks.toggle.diagnostics():map '<leader>ud'
 Snacks.toggle.line_number():map '<leader>ul'
-Snacks.toggle.option('conceallevel',
-    { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2, name = 'Conceal Level' }):map '<leader>uc'
-Snacks.toggle.option('showtabline', { off = 0, on = vim.o.showtabline > 0 and vim.o.showtabline or 2, name = 'Tabline' })
-    :map '<leader>uA'
+Snacks.toggle.option('conceallevel', { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2, name = 'Conceal Level' }):map '<leader>uc'
+Snacks.toggle.option('showtabline', { off = 0, on = vim.o.showtabline > 0 and vim.o.showtabline or 2, name = 'Tabline' }):map '<leader>uA'
 Snacks.toggle.treesitter():map '<leader>uT'
 Snacks.toggle.option('background', { off = 'light', on = 'dark', name = 'Dark Background' }):map '<leader>ub'
 Snacks.toggle.dim():map '<leader>uD'
@@ -169,46 +166,57 @@ Snacks.toggle.profiler():map '<leader>dpp'
 Snacks.toggle.profiler_highlights():map '<leader>dph'
 
 if vim.lsp.inlay_hint then
-    Snacks.toggle.inlay_hints():map '<leader>uh'
+  Snacks.toggle.inlay_hints():map '<leader>uh'
 end
--- lazygit integration
+
+-- git stuff integration
+-- vim.keymap.set('n', ']h', function()
+--   require('unified.navigation').next_hunk()
+-- end)
+--
+-- vim.keymap.set('n', '[h', function()
+--   require('unified.navigation').previous_hunk()
+-- end)
+
 if vim.fn.executable 'lazygit' == 1 then
-    map('n', '<leader>gg', function()
-        Snacks.lazygit { cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') }
-    end, { desc = 'Lazygit (Root Dir)' })
+  map('n', '<leader>gg', function()
+    Snacks.lazygit { cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') }
+  end, { desc = 'Lazygit (Root Dir)' })
 
-    map('n', '<leader>gG', function()
-        Snacks.lazygit()
-    end, { desc = 'Lazygit (cwd)' })
+  map('n', '<leader>gG', function()
+    Snacks.lazygit()
+  end, { desc = 'Lazygit (cwd)' })
 
-    map('n', '<leader>gf', function()
-        fzf.git_bcommits()
-    end, { desc = 'Git Current File History' })
+  map('n', '<leader>gfh', function()
+    fzf.git_bcommits()
+  end, { desc = 'Git Current File History FZF' })
 
-    map('n', '<leader>gl', function()
-        fzf.git_commits {
-            cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', ''),
-        }
-    end, { desc = 'Git Log' })
+  map('n', '<leader>gfl', function()
+    fzf.git_commits {
+      cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', ''),
+    }
+  end, { desc = 'Git Log FZF' })
 
-    map('n', '<leader>gL', function()
-        fzf.git_commits()
-    end, { desc = 'Git Log (cwd)' })
+  map('n', '<leader>gfL', function()
+    fzf.git_commits()
+  end, { desc = 'Git Log (cwd) FZF' })
 end
 
-map('n', '<leader>gb', function()
-    fzf.git_blame()
-end, { desc = 'Git Blame Line' })
-map({ 'n', 'x' }, '<leader>gB', function()
-    Snacks.gitbrowse()
+map('n', '<leader>gfb', function()
+  fzf.git_blame()
+end, { desc = 'Git Blame File FZF' })
+
+map({ 'n', 'x' }, '<leader>gfB', function()
+  Snacks.gitbrowse()
 end, { desc = 'Git Browse (open)' })
-map({ 'n', 'x' }, '<leader>gY', function()
-    Snacks.gitbrowse {
-        open = function(url)
-            vim.fn.setreg('+', url)
-        end,
-        notify = false,
-    }
+
+map({ 'n', 'x' }, '<leader>gfY', function()
+  Snacks.gitbrowse {
+    open = function(url)
+      vim.fn.setreg('+', url)
+    end,
+    notify = false,
+  }
 end, { desc = 'Git Browse (copy)' })
 
 -- quit
@@ -217,31 +225,31 @@ map('n', '<leader>qq', '<cmd>qa<cr>', { desc = 'Quit All' })
 -- highlights under cursor
 map('n', '<leader>ui', vim.show_pos, { desc = 'Inspect Pos' })
 map('n', '<leader>uI', function()
-    vim.treesitter.inspect_tree()
-    vim.api.nvim_input 'I'
+  vim.treesitter.inspect_tree()
+  vim.api.nvim_input 'I'
 end, { desc = 'Inspect Tree' })
 
 -- floating terminal (Fixed FIXME)
 map('n', '<leader>fT', function()
-    Snacks.terminal()
+  Snacks.terminal()
 end, { desc = 'Terminal (cwd)' })
 
 map('n', '<leader>ft', function()
-    Snacks.terminal(nil, {
-        cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
-    })
+  Snacks.terminal(nil, {
+    cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
+  })
 end, { desc = 'Terminal (Root Dir)' })
 
 map('n', '<c-/>', function()
-    Snacks.terminal(nil, {
-        cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
-    })
+  Snacks.terminal(nil, {
+    cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
+  })
 end, { desc = 'Terminal (Root Dir)' })
 
 map('n', '<c-_>', function()
-    Snacks.terminal(nil, {
-        cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
-    })
+  Snacks.terminal(nil, {
+    cwd = vim.fn.system('git rev-parse --show-toplevel 2>/dev/null'):gsub('\n', '') or vim.fn.getcwd(),
+  })
 end, { desc = 'which_key_ignore' })
 
 -- Terminal Mappings
@@ -267,28 +275,28 @@ map('n', '<leader><tab>[', '<cmd>tabprevious<cr>', { desc = 'Previous Tab' })
 map('n', '<Leader>cn', ":lua require('neogen').generate()<CR>", { desc = 'Generate Annotation(Neogen)' })
 
 local function notifications_picker()
-    local notifications = require('notify').history()
+  local notifications = require('notify').history()
 
-    local entries = {}
-    for _, notif in ipairs(notifications) do
-        table.insert(entries, string.format('[%s] %s', notif.level, notif.message[1]))
-    end
+  local entries = {}
+  for _, notif in ipairs(notifications) do
+    table.insert(entries, string.format('[%s] %s', notif.level, notif.message[1]))
+  end
 
-    fzf.fzf_exec(entries, {
-        winopts = {
-            title = 'Notifications',
-            title_pos = 'center',
-        },
-        previewer = 'builtin',
-        actions = {
-            ['default'] = function(selected)
-                local idx = vim.tbl_indexof(entries, selected[1]) + 1
-                if notifications[idx] then
-                    vim.notify(table.concat(notifications[idx].message, '\n'), notifications[idx].level)
-                end
-            end,
-        },
-    })
+  fzf.fzf_exec(entries, {
+    winopts = {
+      title = 'Notifications',
+      title_pos = 'center',
+    },
+    previewer = 'builtin',
+    actions = {
+      ['default'] = function(selected)
+        local idx = vim.tbl_indexof(entries, selected[1]) + 1
+        if notifications[idx] then
+          vim.notify(table.concat(notifications[idx].message, '\n'), notifications[idx].level)
+        end
+      end,
+    },
+  })
 end
 
 vim.keymap.set('n', '<leader>n', notifications_picker, { desc = 'View Notifications (fzf)' })
@@ -296,11 +304,26 @@ vim.keymap.set('n', '<leader>n', notifications_picker, { desc = 'View Notificati
 -- native snippets
 -- Now handling both Neovim 0.11+ and earlier versions
 if vim.fn.has 'nvim-0.11' == 0 then
-    map('s', '<Tab>', function()
-        return vim.snippet.active { direction = 1 } and '<cmd>lua vim.snippet.jump(1)<cr>' or '<Tab>'
-    end, { expr = true, desc = 'Jump Next' })
-    map({ 'i', 's' }, '<S-Tab>', function()
-        return vim.snippet.active { direction = -1 } and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
-    end, { expr = true, desc = 'Jump Previous' })
+  map('s', '<Tab>', function()
+    return vim.snippet.active { direction = 1 } and '<cmd>lua vim.snippet.jump(1)<cr>' or '<Tab>'
+  end, { expr = true, desc = 'Jump Next' })
+  map({ 'i', 's' }, '<S-Tab>', function()
+    return vim.snippet.active { direction = -1 } and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
+  end, { expr = true, desc = 'Jump Previous' })
 end
+
+-- Copy full file path to clipboard
+vim.keymap.set('n', '<leader>cP', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  print('Copied: ' .. path)
+end, { desc = 'Copy absolute file path' })
+
+-- Copy relative file path to clipboard
+map('n', '<leader>cp', function()
+  local path = vim.fn.expand '%'
+  vim.fn.setreg('+', path)
+  print('Copied: ' .. path)
+end, { desc = 'Copy relative file path' })
+
 return {}
