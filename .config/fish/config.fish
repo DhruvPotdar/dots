@@ -31,8 +31,14 @@ end
 abbr gs "git status"
 
 abbr ati "cd ~/mule && bass source ~/mule/env.dev.sh"
-abbr viz "cd ~/mule && bass source ~/mule/env.dev.sh && cd ati/schema; protoc --python_out=. messages.proto; cd ~/data && streamlit run ~/mule/ati/tools/visualizer/visualizer.py"
 
+function viz
+    cd ~/mule 
+    bass source env.dev.sh
+    cd ati/schema; protoc --python_out=. messages.proto
+    streamlit run ~/mule/ati/tools/visualizer/visualizer.py
+    cd -
+end
 
 function gl
     git log --graph --date=relative \
@@ -41,6 +47,7 @@ end
 
 function ros
     # ROS
+
     bass source /opt/ros/humble/setup.bash
     set -gx QT_QPA_PLATFORM xcb
     set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
