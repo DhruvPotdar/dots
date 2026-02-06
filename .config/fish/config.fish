@@ -11,8 +11,6 @@ alias c clear
 alias cat bat
 # alias btop 'btop --force-utf'
 abbr fconf 'nvim ~/.config/fish/config.fish'
-# abbr dbr 'distrobox enter ros'
-# abbr dba 'distrobox enter ati'
 
 set -gx EDITOR nvim
 set -x MANPAGER "nvim +Man!"
@@ -47,7 +45,6 @@ end
 
 function ros
     # ROS
-
     bass source /opt/ros/humble/setup.bash
     set -gx QT_QPA_PLATFORM xcb
     set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
