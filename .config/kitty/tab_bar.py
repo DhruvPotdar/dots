@@ -57,7 +57,7 @@ def _draw_right_status(screen: Screen, is_last: bool) -> int:
     draw_attributed_string(Formatter.reset, screen)
 
     clock = datetime.now().strftime("%H:%M ")
-    utc = datetime.now().strftime("on %A, %B %d, %Y")
+    utc = datetime.now().strftime("| %A, %B %d, %Y")
 
     cells = [
         (clock_color, clock),
@@ -95,6 +95,26 @@ def draw_tab(
     is_last: bool,
     extra_data: ExtraData,
 ) -> int:
+    # Calculate centering on first tab
+    if index == 0:
+        # Calculate total tabs width
+        tabs_width = 0
+        for t in draw_data.tab_bar_data:
+            tabs_width += (
+                len(str(t.tab.index)) + len(t.tab.title) + 6
+            )  # approximate tab width
+
+        # Calculate right status width
+        clock = datetime.now().strftime("%H:%M ")
+        utc = datetime.now().strftime("on %A, %B %d, %Y")
+        right_width = len(clock) + len(utc) + RIGHT_MARGIN
+
+        # Calculate center offset
+        available_space = screen.columns - right_width
+        center_offset = max(0, (available_space - tabs_width) // 2)
+
+        if center_offset > 0:
+            screen.draw(" " * center_offset)
 
     _draw_left_status(
         draw_data,
