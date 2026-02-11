@@ -494,4 +494,13 @@ return {
     end,
   },
   { 'kevinhwang91/nvim-bqf' },
+  {
+    'fei6409/log-highlight.nvim',
+    opts = {
+      keyword = {
+        warning = { 'obstacle', 'trip_status' },
+        pass = { 'final route:' },
+      },
+    },
+  },
 }
