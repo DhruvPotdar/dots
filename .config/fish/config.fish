@@ -28,14 +28,28 @@ end
 
 abbr gs "git status"
 
-abbr ati "cd ~/mule && bass source ~/mule/env.dev.sh"
+
+function ati
+    set curr_dir $PWD
+    cd ~/mule 
+    bass source env.dev.sh
+    cd $curr_dir
+end
 
 function viz
+    set curr_dir $PWD
     cd ~/mule 
     bass source env.dev.sh
     cd ati/schema; protoc --python_out=. messages.proto
-    streamlit run ~/mule/ati/tools/visualizer/visualizer.py
-    cd -
+    cd ../..
+    streamlit run ./ati/tools/visualizer/visualizer.py
+    echo $curr_dir
+    cd $curr_dir
+end
+
+function kconf
+    cd ~/.config/kitty
+    nvim kitty.conf
 end
 
 function gl
