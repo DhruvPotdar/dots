@@ -92,53 +92,55 @@ return {
           },
         },
 
-        basedpyright = {
-          settings = {
-            basedpyright = {
-              analysis = {
-                -- Enforcing basic type checking without being too strict
-                typeCheckingMode = 'standard', -- Can be "off", "basic", or "strict" (adjust based on your needs)
+        -- basedpyright = {
+        --   settings = {
+        --     basedpyright = {
+        --       analysis = {
+        --         -- Enforcing basic type checking without being too strict
+        --         typeCheckingMode = 'standard', -- Can be "off", "basic", or "strict" (adjust based on your needs)
+        --
+        --         -- Limit diagnostics to open files only to reduce clutter
+        --         diagnosticMode = 'openFilesOnly', -- Only check open files for issues
+        --
+        --         -- Avoid errors about missing type stubs, but you can choose to show warnings for them if needed
+        --         reportMissingTypeStubs = 'none', -- "none", "warning", or "error"
+        --
+        --         -- Avoid too many warnings about unused call results, but report them as a warning
+        --         reportUnusedCallResult = 'warning', -- "none", "warning", "error"
+        --
+        --         -- Suppress unknown type errors but allow warnings for potentially problematic code
+        --         reportUnknownType = 'warning', -- "none", "warning", or "error"
+        --
+        --         -- Suggesting a good coding practice: avoid unknown members on dynamic types
+        --         reportUnknownMemberType = 'none', -- Ensure we're not referencing members with unknown types
+        --
+        --         -- Enforcing type annotations for functions and methods for better type safety
+        --         reportMissingFunctionType = 'warning', -- Warn when function types are missing
+        --
+        --         -- Enforce variable type annotations for better clarity
+        --         reportMissingVariableType = 'warning', -- Ensure variables are typed
+        --
+        --         -- Suppress false positives for non-essential diagnostics, but show important ones
+        --         reportUnusedVariable = 'warning', -- Warn about unused variables, but don't be overly strict
+        --
+        --         -- Use stub files for packages if necessary to improve type safety
+        --         stubPath = { './typings', './stubs' }, -- Adjust paths to stubs if necessary
+        --
+        --         -- Enforce a clear, maintainable code style by checking for type mismatches
+        --         reportInconsistentReturnType = 'warning', -- Ensure consistent return types across functions
+        --
+        --         -- Optionally, set max number of diagnostics to avoid overwhelming the screen
+        --         maxNumberOfProblems = 100, -- Limit the number of diagnostics shown (can adjust based on your preference)
+        --
+        --         inlay_hints = {
+        --           generic_tfalseyped = true,
+        --         },
+        --       },
+        --     },
+        --   },
+        -- },
 
-                -- Limit diagnostics to open files only to reduce clutter
-                diagnosticMode = 'openFilesOnly', -- Only check open files for issues
-
-                -- Avoid errors about missing type stubs, but you can choose to show warnings for them if needed
-                reportMissingTypeStubs = 'none', -- "none", "warning", or "error"
-
-                -- Avoid too many warnings about unused call results, but report them as a warning
-                reportUnusedCallResult = 'warning', -- "none", "warning", "error"
-
-                -- Suppress unknown type errors but allow warnings for potentially problematic code
-                reportUnknownType = 'warning', -- "none", "warning", or "error"
-
-                -- Suggesting a good coding practice: avoid unknown members on dynamic types
-                reportUnknownMemberType = 'none', -- Ensure we're not referencing members with unknown types
-
-                -- Enforcing type annotations for functions and methods for better type safety
-                reportMissingFunctionType = 'warning', -- Warn when function types are missing
-
-                -- Enforce variable type annotations for better clarity
-                reportMissingVariableType = 'warning', -- Ensure variables are typed
-
-                -- Suppress false positives for non-essential diagnostics, but show important ones
-                reportUnusedVariable = 'warning', -- Warn about unused variables, but don't be overly strict
-
-                -- Use stub files for packages if necessary to improve type safety
-                stubPath = { './typings', './stubs' }, -- Adjust paths to stubs if necessary
-
-                -- Enforce a clear, maintainable code style by checking for type mismatches
-                reportInconsistentReturnType = 'warning', -- Ensure consistent return types across functions
-
-                -- Optionally, set max number of diagnostics to avoid overwhelming the screen
-                maxNumberOfProblems = 100, -- Limit the number of diagnostics shown (can adjust based on your preference)
-
-                inlay_hints = {
-                  generic_tfalseyped = true,
-                },
-              },
-            },
-          },
-        },
+        ty = {},
       },
       setup = {},
     },
