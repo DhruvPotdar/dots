@@ -1,0 +1,8 @@
+
+right_format = '$time'
+
+[time]
+disabled = false
+style = "bold blue"
+format = '[$time]($style)'
+
