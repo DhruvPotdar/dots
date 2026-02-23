@@ -4,11 +4,12 @@ if status is-interactive
 end
 
 alias ls 'eza  --icons always '
-alias lm 'eza  --icons always ~ | grep mule'
+alias lm 'eza  --icons always ~ | rg mule'
 alias l 'eza  --icons always'
 alias ll 'eza  -la --icons always'
 alias c clear
 alias cat bat
+alias lg lazygit
 # alias btop 'btop --force-utf'
 abbr fconf 'nvim ~/.config/fish/config.fish'
 
@@ -34,6 +35,10 @@ function ati
     cd ~/mule 
     bass source env.dev.sh
     cd $curr_dir
+
+    # Temporary, needed for acados in mpc
+    set -x ACADOS_SOURCE_DIR $HOME/repos/acados
+    set -x LD_LIBRARY_PATH $LD_LIBRARY_PATH $ACADOS_SOURCE_DIR/lib
 end
 
 function viz
@@ -42,7 +47,8 @@ function viz
     bass source env.dev.sh
     cd ati/schema; protoc --python_out=. messages.proto
     cd ../..
-    streamlit run ./ati/tools/visualizer/visualizer.py
+    cd
+    streamlit run ~/mule/ati/tools/visualizer/visualizer.py
     echo $curr_dir
     cd $curr_dir
 end
@@ -59,22 +65,32 @@ end
 
 function ros
     # ROS
-    bass source /opt/ros/humble/setup.bash
-    set -gx QT_QPA_PLATFORM xcb
+    bass source /opt/ros/jazzy/setup.bash
+    # set -gx QT_QPA_PLATFORM xcb
     set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
-    set -x ROS_DOMAIN_ID 69
+    set -gx ROS_DOMAIN_ID 69
     set -x ROS_LOCALHOST_ONLY 1
     # set -x ROS_HOSTNAME dhruvpotdar
     # ulimit -Sn 1024
     # ulimit -Hn 524288
     abbr cb "colcon build"
-    alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
+    # alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
+    alias rr "ros2 run $(ros2 pkg executables | fzf | string split ' ')"
 end
 
-# Sourcing apps 
+function starship_transient_prompt_func
+  starship module character
+end
+
+function starship_transient_rprompt_func
+  starship module time
+end
+
+# sourcing apps 
 zoxide init fish | source
 atuin init fish | source
 starship init fish | source
+enable_transience
 
 # opencode
 fish_add_path /home/dhruvpotdar/.opencode/bin
