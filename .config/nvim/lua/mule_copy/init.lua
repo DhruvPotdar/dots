@@ -86,57 +86,72 @@ end
 -- Remote path handling
 -- ---------------------------
 
-local function ensure_remote_path(opts)
+local function ensure_remote_path(opts, callback)
   vim.notify('Checking if remote path exists...', vim.log.levels.INFO)
 
-  local check_cmd = {
-    'ssh',
-    opts.ssh,
-    'docker',
-    'exec',
-    opts.container,
-    'test',
-    '-e',
-    opts.remote_path,
-  }
+  vim.defer_fn(function()
+    local check_cmd = {
+      'ssh',
+      opts.ssh,
+      'docker',
+      'exec',
+      opts.container,
+      'test',
+      '-e',
+      opts.remote_path,
+    }
 
-  local success = run_command(check_cmd)
+    local success = run_command(check_cmd)
 
-  if success then
-    vim.notify('Remote path exists: ' .. opts.remote_path, vim.log.levels.INFO)
-    return true
-  end
+    if success then
+      vim.defer_fn(function()
+        vim.notify('Remote path exists: ' .. opts.remote_path, vim.log.levels.INFO)
+        callback(true)
+      end, 250)
+      return
+    end
 
-  vim.notify('Remote path does not exist: ' .. opts.remote_path, vim.log.levels.WARN)
+    vim.defer_fn(function()
+      vim.notify('Remote path does not exist: ' .. opts.remote_path, vim.log.levels.WARN)
 
-  local choice = vim.fn.input 'Remote file does not exist. Create it? (y/n): '
-  if choice ~= 'y' and choice ~= 'Y' then
-    vim.notify('Cancelled: remote file does not exist', vim.log.levels.WARN)
-    return false
-  end
+      vim.defer_fn(function()
+        local choice = vim.fn.input 'Remote file does not exist. Create it? (y/n): '
+        if choice ~= 'y' and choice ~= 'Y' then
+          vim.notify('Cancelled: remote file does not exist', vim.log.levels.WARN)
+          callback(false)
+          return
+        end
 
-  local parent_dir = vim.fn.fnamemodify(opts.remote_path, ':h')
+        local parent_dir = vim.fn.fnamemodify(opts.remote_path, ':h')
 
-  local mkdir_cmd = {
-    'ssh',
-    opts.ssh,
-    'docker',
-    'exec',
-    opts.container,
-    'sh',
-    '-c',
-    string.format('mkdir -p %s && touch %s', vim.fn.shellescape(parent_dir), vim.fn.shellescape(opts.remote_path)),
-  }
+        local mkdir_cmd = {
+          'ssh',
+          opts.ssh,
+          'docker',
+          'exec',
+          opts.container,
+          'sh',
+          '-c',
+          string.format('mkdir -p %s && touch %s', vim.fn.shellescape(parent_dir), vim.fn.shellescape(opts.remote_path)),
+        }
 
-  local create_success, output = run_command(mkdir_cmd)
+        local create_success, output = run_command(mkdir_cmd)
 
-  if not create_success then
-    vim.notify('Failed to create remote path: ' .. opts.remote_path .. '\n' .. table.concat(output, '\n'), vim.log.levels.ERROR)
-    return false
-  end
+        vim.defer_fn(function()
+          if not create_success then
+            vim.notify('Failed to create remote path: ' .. opts.remote_path .. '\n' .. table.concat(output, '\n'), vim.log.levels.ERROR)
+            callback(false)
+            return
+          end
 
-  vim.notify('Created remote path: ' .. opts.remote_path, vim.log.levels.INFO)
-  return true
+          vim.notify('Created remote path: ' .. opts.remote_path, vim.log.levels.INFO)
+          vim.defer_fn(function()
+            callback(true)
+          end, 250)
+        end, 250)
+      end, 250)
+    end, 250)
+  end, 250)
 end
 
 -- ---------------------------
@@ -151,61 +166,75 @@ local function copy_file(opts)
   -- Debug (enable if diagnosing)
   -- vim.notify("Remote final path: " .. remote_final)
 
-  local path_ok = ensure_remote_path {
+  ensure_remote_path({
     ssh = opts.ssh,
     container = opts.container,
     remote_path = remote_final,
-  }
+  }, function(path_ok)
+    if not path_ok then
+      return
+    end
 
-  if not path_ok then
-    return
-  end
+    -- Step 1: SCP to remote host
+    vim.defer_fn(function()
+      vim.notify('Copying file to remote host...', vim.log.levels.INFO)
 
-  -- Step 1: SCP to remote host
-  vim.notify('Copying file to remote host...', vim.log.levels.INFO)
+      vim.defer_fn(function()
+        local scp_cmd = {
+          'scp',
+          opts.local_path,
+          opts.ssh .. ':' .. remote_tmp,
+        }
 
-  local scp_cmd = {
-    'scp',
-    opts.local_path,
-    opts.ssh .. ':' .. remote_tmp,
-  }
+        local scp_success, scp_output = run_command(scp_cmd)
 
-  local scp_success, scp_output = run_command(scp_cmd)
+        vim.defer_fn(function()
+          if not scp_success then
+            vim.notify('Failed to copy file to remote host\n' .. table.concat(scp_output, '\n'), vim.log.levels.ERROR)
+            return
+          end
 
-  if not scp_success then
-    vim.notify('Failed to copy file to remote host\n' .. table.concat(scp_output, '\n'), vim.log.levels.ERROR)
-    return
-  end
+          -- Step 2: docker cp into container
+          vim.defer_fn(function()
+            vim.notify('Copying file into container...', vim.log.levels.INFO)
 
-  -- Step 2: docker cp into container
-  vim.notify('Copying file into container...', vim.log.levels.INFO)
+            vim.defer_fn(function()
+              local docker_cp_cmd = {
+                'ssh',
+                opts.ssh,
+                'docker',
+                'cp',
+                remote_tmp,
+                opts.container .. ':' .. remote_final,
+              }
 
-  local docker_cp_cmd = {
-    'ssh',
-    opts.ssh,
-    'docker',
-    'cp',
-    remote_tmp,
-    opts.container .. ':' .. remote_final,
-  }
+              local docker_success, docker_output = run_command(docker_cp_cmd)
 
-  local docker_success, docker_output = run_command(docker_cp_cmd)
+              vim.defer_fn(function()
+                if not docker_success then
+                  vim.notify('Failed to copy file to container\n' .. table.concat(docker_output, '\n'), vim.log.levels.ERROR)
+                  return
+                end
 
-  if not docker_success then
-    vim.notify('Failed to copy file to container\n' .. table.concat(docker_output, '\n'), vim.log.levels.ERROR)
-    return
-  end
+                -- Step 3: cleanup
+                run_command {
+                  'ssh',
+                  opts.ssh,
+                  'rm',
+                  '-f',
+                  remote_tmp,
+                }
 
-  -- Step 3: cleanup
-  run_command {
-    'ssh',
-    opts.ssh,
-    'rm',
-    '-f',
-    remote_tmp,
-  }
-
-  vim.notify(string.format('✓ Successfully copied to %s:%s', opts.container, remote_final), vim.log.levels.INFO)
+                vim.defer_fn(function()
+                  vim.notify(string.format('✓ Successfully copied to %s:%s', opts.container, remote_final), vim.log.levels.INFO)
+                end, 250)
+              end, 250)
+            end, 250)
+          end, 250)
+        end, 250)
+      end, 250)
+    end, 250)
+  end)
 end
 
 -- ---------------------------
@@ -261,7 +290,7 @@ function M.copy_to_robot_quick()
   end
 
   if not M.config.last_robot_ip or not M.config.last_container then
-    vim.notify('No previ robot/container found, using full copy', vim.log.levels.WARN)
+    vim.notify('No previous robot/container found, using full copy', vim.log.levels.WARN)
     M.copy_to_robot()
     return
   end
