@@ -503,4 +503,11 @@ return {
       },
     },
   },
+  {
+    '3rd/image.nvim',
+    build = false, -- so that it doesn't build the rock https://github.com/3rd/image.nvim/issues/
+    opts = {
+      processor = 'magick_cli',
+    },
+  },
 }
