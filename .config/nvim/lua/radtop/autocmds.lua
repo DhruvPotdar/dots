@@ -130,27 +130,35 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   group = augroup 'auto_close_folds',
   callback = function(event)
     local buf = event.buf
-    if vim.bo[buf].buftype ~= '' then return end
+    if vim.bo[buf].buftype ~= '' then
+      return
+    end
     vim.schedule(function()
-      if not vim.api.nvim_buf_is_valid(buf) then return end
+      if not vim.api.nvim_buf_is_valid(buf) then
+        return
+      end
       local ft = vim.bo[buf].filetype
       local import_types = {
-        python     = { 'import_statement', 'import_from_statement', 'future_import_statement' },
+        python = { 'import_statement', 'import_from_statement', 'future_import_statement' },
         javascript = { 'import_statement' },
         typescript = { 'import_statement' },
-        tsx        = { 'import_statement' },
-        jsx        = { 'import_statement' },
-        go         = { 'import_declaration' },
-        rust       = { 'use_declaration' },
-        c          = { 'preproc_include' },
-        cpp        = { 'preproc_include' },
+        tsx = { 'import_statement' },
+        jsx = { 'import_statement' },
+        go = { 'import_declaration' },
+        rust = { 'use_declaration' },
+        c = { 'preproc_include' },
+        cpp = { 'preproc_include' },
       }
       local comment_types = { 'comment', 'block_comment', 'line_comment', 'doc_comment' }
       local types_to_close = vim.list_extend(vim.deepcopy(comment_types), import_types[ft] or {})
       local ok, parser = pcall(vim.treesitter.get_parser, buf)
-      if not ok or not parser then return end
+      if not ok or not parser then
+        return
+      end
       local tree = parser:parse()[1]
-      if not tree then return end
+      if not tree then
+        return
+      end
       local root = tree:root()
       vim.api.nvim_buf_call(buf, function()
         for node in root:iter_children() do
@@ -286,3 +294,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end,
 })
+
+if vim.g.neovide then
+  vim.o.guifont = 'CaskaydiaCove Nerd Font:h10' -- text below applies for VimScript
+end
