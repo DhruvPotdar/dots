@@ -43,6 +43,7 @@ end
 function viz
     set curr_dir $PWD
     cd ~/mule 
+    echo "Current Branch: $(git branch --show-current)"
     bass source env.dev.sh
     if test -e ati/core
         cd ati/common/schema; protoc --python_out=. messages.proto
@@ -67,26 +68,26 @@ function gl
         --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %C(dim white)- %an, %ar'
 end
 
-function ros
-    # ROS
-    bass source /opt/ros/jazzy/setup.bash
-    set -gx QT_QPA_PLATFORM xcb
-    set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
-    # set -x ROS_DOMAIN_ID 69
-    set -x ROS_LOCALHOST_ONLY 1
-    # set -x ROS_HOSTNAME dhruvpotdar
-    # ulimit -Sn 1024
-    # ulimit -Hn 524288
-    abbr cb "colcon build"
-    # alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
-    # alias rr "ros2 run $(ros2 pkg executables | fzf | string split ' ')"
-    abbr cb "colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --symlink-install"
+# function ros
+#     # ROS
+#     source ~/.config/fish/ros2.fish
+#     set -gx QT_QPA_PLATFORM xcb
+#     set -x ROS_MASTER_URI 'http://dhruvpotdar:11311'
+#     # set -x ROS_DOMAIN_ID 69
+#     set -x ROS_LOCALHOST_ONLY 1
+#     # set -x ROS_HOSTNAME dhruvpotdar
+#     # ulimit -Sn 1024
+#     # ulimit -Hn 524288
+#     abbr cb "colcon build"
+#     # alias tftree "rosrun rqt_tf_tree rqt_tf_tree"
+#     # alias rr "ros2 run $(ros2 pkg executables | fzf | string split ' ')"
+#     abbr cb "colcon build --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --symlink-install"
+#
+# end
 
-end
-
-function starship_transient_prompt_func
-  starship module character
-end
+# function starship_transient_prompt_func
+#   starship module character
+# end
 
 function starship_transient_rprompt_func
   starship module time
@@ -95,7 +96,7 @@ end
 # sourcing apps 
 zoxide init fish | source
 atuin init fish | source
-# starship init fish | source
+starship init fish | source
 enable_transience
 
 # opencode

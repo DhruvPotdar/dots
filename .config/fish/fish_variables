@@ -5,6 +5,8 @@ SETUVAR --export EDITOR:nvim
 SETUVAR --export PAGER:bat
 SETUVAR --export ROS2_FISH_ABBR_OR_ALIAS:abbr
 SETUVAR __fish_initialized:3400
+SETUVAR _fish_abbr_fconf:nvim\x20\x7e/\x2econfig/fish/config\x2efish
+SETUVAR _fish_abbr_gs:git\x20status
 SETUVAR _fisher_kpbaks_2F_ros2_2E_fish_files:\x7e/\x2econfig/fish/functions/__as\x2dtree\x2epy\x1e\x7e/\x2econfig/fish/functions/__parse\x2dros2\x2dpackage\x2dmanifest\x2epy\x1e\x7e/\x2econfig/fish/functions/_ros2_fish_greeting\x2efish\x1e\x7e/\x2econfig/fish/conf\x2ed/ros2\x2efish\x1e\x7e/\x2econfig/fish/completions/colcon\x2efish\x1e\x7e/\x2econfig/fish/completions/ign\x2efish\x1e\x7e/\x2econfig/fish/completions/ros2\x2efish
 SETUVAR _fisher_plugins:kpbaks/ros2\x2efish
 SETUVAR _fisher_upgraded_to_4_4:\x1d
