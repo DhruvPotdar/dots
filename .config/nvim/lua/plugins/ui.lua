@@ -443,16 +443,6 @@ return {
     end,
   },
   {
-    'sphamba/smear-cursor.nvim',
-    enabled = false,
-    event = 'VeryLazy',
-    cond = vim.g.neovide == nil,
-    opts = {
-      hide_target_hack = true,
-      cursor_color = 'none',
-    },
-  },
-  {
     'Bekaboo/dropbar.nvim',
     event = 'VeryLazy',
     config = function()

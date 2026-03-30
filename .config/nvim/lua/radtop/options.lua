@@ -50,6 +50,10 @@ opt.fillchars = {
   eob = ' ',
 }
 opt.foldlevel = 99
+opt.foldlevelstart = 99
+opt.foldenable = true
+opt.foldmethod = 'expr'
+opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 -- opt.formatexpr = "v:lua.require'radtop.utils'.formatexpr()"
 -- opt.formatoptions = 'jcroqlnt' -- tcqj
 opt.grepformat = '%f:%l:%c:%m'
@@ -91,12 +95,7 @@ opt.virtualedit = 'block' -- Allow cursor to move where there is no text in visu
 opt.wildmode = 'longest:full,full' -- Command-line completion mode
 opt.winminwidth = 5 -- Minimum window width
 opt.wrap = true -- Enable line wrap
-opt.foldmethod = 'indent'
-
 opt.smoothscroll = true
--- opt.foldexpr = "v:lua.require'radtop.utils'.foldexpr()"
--- opt.foldmethod = 'expr'
--- opt.foldtext = ''
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0

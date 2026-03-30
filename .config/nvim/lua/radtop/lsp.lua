@@ -5,7 +5,7 @@ local icons = require 'radtop.icons'
 local function on_rename(from, to)
   local clients = vim.lsp.get_clients()
   for _, client in ipairs(clients) do
-    if client.supports_method 'workspace/willRenameFiles' then
+    if client:supports_method 'workspace/willRenameFiles' then
       local resp = client.request_sync('workspace/willRenameFiles', {
         files = {
           {
@@ -18,7 +18,7 @@ local function on_rename(from, to)
         vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding)
       end
     end
-    if client.supports_method 'workspace/didRenameFiles' then
+    if client:supports_method 'workspace/didRenameFiles' then
       client.notify('workspace/didRenameFiles', {
         files = {
           {
@@ -178,7 +178,7 @@ function lsp_keymaps.get()
     { '<c-k>', vim.lsp.buf.signature_help, mode = 'i', desc = 'Signature Help', has = 'signatureHelp' },
     { '<leader>ca', vim.lsp.buf.code_action, desc = 'Code Action', mode = { 'n', 'v' }, has = 'codeAction' },
     { '<leader>cc', vim.lsp.codelens.run, desc = 'Run Codelens', mode = { 'n', 'v' }, has = 'codeLens' },
-    { '<leader>cC', vim.lsp.codelens.refresh, desc = 'Refresh & Display Codelens', mode = { 'n' }, has = 'codeLens' },
+    { '<leader>cC', vim.lsp.codelens.enable, desc = 'Refresh & Display Codelens', mode = { 'n' }, has = 'codeLens' },
     { '<leader>cR', rename_file, desc = 'Rename File', mode = { 'n' }, has = { 'workspace/didRenameFiles', 'workspace/willRenameFiles' } },
     { '<leader>cr', vim.lsp.buf.rename, desc = 'Rename', has = 'rename' },
     { '<leader>cA', source_action, desc = 'Source Action', has = 'codeAction' },
@@ -234,7 +234,7 @@ function lsp_keymaps.has(buffer, method)
   method = method:find '/' and method or 'textDocument/' .. method
   local clients = vim.lsp.get_clients { bufnr = buffer }
   for _, client in ipairs(clients) do
-    if client.supports_method(method) then
+    if client:supports_method(method) then
       return true
     end
   end

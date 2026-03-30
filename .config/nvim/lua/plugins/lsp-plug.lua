@@ -153,7 +153,7 @@ return {
         callback = function(args)
           local buffer = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if opts.inlay_hints.enabled and client.supports_method 'textDocument/inlayHint' then
+          if opts.inlay_hints.enabled and client:supports_method 'textDocument/inlayHint' then
             if
               vim.api.nvim_buf_is_valid(buffer)
               and vim.bo[buffer].buftype == ''
@@ -162,9 +162,12 @@ return {
               vim.lsp.inlay_hint.enable(true, { bufnr = buffer })
             end
           end
-          if opts.folds.enabled and client.supports_method 'textDocument/foldingRange' then
-            -- vim.bo[buffer].foldmethod = 'expr'
-            -- vim.bo[buffer].foldexpr = 'v:lua.vim.lsp.foldexpr()'
+          if opts.folds.enabled and client:supports_method 'textDocument/foldingRange' then
+            vim.schedule(function()
+              for _, win in ipairs(vim.fn.win_findbuf(buffer)) do
+                vim.api.nvim_set_option_value('foldexpr', 'v:lua.vim.lsp.foldexpr()', { win = win })
+              end
+            end)
           end
           if opts.codelens.enabled and vim.lsp.codelens and client.supports_method 'textDocument/codeLens' then
             vim.lsp.codelens.refresh { bufnr = buffer }

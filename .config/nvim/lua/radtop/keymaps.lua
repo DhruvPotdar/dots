@@ -272,6 +272,36 @@ map('n', '<leader><tab>]', '<cmd>tabnext<cr>', { desc = 'Next Tab' })
 map('n', '<leader><tab>d', '<cmd>tabclose<cr>', { desc = 'Close Tab' })
 map('n', '<leader><tab>[', '<cmd>tabprevious<cr>', { desc = 'Previous Tab' })
 
+-- Peek folded lines under cursor
+map('n', 'zp', function()
+  local start = vim.fn.foldclosed '.'
+  if start == -1 then return end
+  local finish = vim.fn.foldclosedend '.'
+  local lines = vim.api.nvim_buf_get_lines(0, start - 1, finish, false)
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].filetype = vim.bo.filetype
+  local width = math.min(math.max(40, vim.o.columns - 20), vim.o.columns - 4)
+  local height = math.min(#lines, math.floor(vim.o.lines * 0.4))
+  local win = vim.api.nvim_open_win(buf, false, {
+    relative = 'cursor',
+    row = 1,
+    col = 0,
+    width = width,
+    height = height,
+    style = 'minimal',
+    border = { '', '─', '', '', '', '─', '', '' },
+  })
+  vim.wo[win].winhighlight = 'Normal:Folded'
+  vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'BufLeave' }, {
+    once = true,
+    callback = function()
+      if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
+      if vim.api.nvim_buf_is_valid(buf) then vim.api.nvim_buf_delete(buf, { force = true }) end
+    end,
+  })
+end, { desc = 'Peek fold' })
+
 map('n', '<Leader>cn', ":lua require('neogen').generate()<CR>", { desc = 'Generate Annotation(Neogen)' })
 
 local function notifications_picker()

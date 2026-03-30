@@ -23,7 +23,7 @@ return {
           ret = vim.lsp.get_active_clients(opts)
           if opts and opts.method then
             ret = vim.tbl_filter(function(client)
-              return client.supports_method(opts.method, { bufnr = opts.bufnr })
+              return client:supports_method(opts.method, { bufnr = opts.bufnr })
             end, ret)
           end
         end
@@ -105,8 +105,9 @@ return {
       return {
         'default-title',
         fzf_colors = true,
+        -- fzf_bin = 'sk',
         fzf_opts = {
-          ['--no-scrollbar'] = true,
+          -- ['--no-scrollbar'] = true,
           ['--layout=reverse'] = true,
         },
         defaults = {
