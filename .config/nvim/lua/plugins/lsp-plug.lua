@@ -169,7 +169,7 @@ return {
               end
             end)
           end
-          if opts.codelens.enabled and vim.lsp.codelens and client.supports_method 'textDocument/codeLens' then
+          if opts.codelens.enabled and vim.lsp.codelens and client:supports_method 'textDocument/codeLens' then
             vim.lsp.codelens.refresh { bufnr = buffer }
             vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold', 'InsertLeave' }, {
               buffer = buffer,
