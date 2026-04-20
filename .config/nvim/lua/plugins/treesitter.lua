@@ -2,39 +2,26 @@
 return {
   {
     'nvim-treesitter/nvim-treesitter',
-    version = false, -- last release is way too old and doesn't work on Windows
+    branch = 'main',
     build = ':TSUpdate',
-    event = { 'BufReadPre', 'BufNewFile', 'VeryLazy' },
-    lazy = vim.fn.argc(-1) == 0, -- load treesitter early when opening a file from the cmdline
-    dependencies = {
-      -- Make textobjects a dependency so it loads with treesitter and receives the config naturally
-      'nvim-treesitter/nvim-treesitter-textobjects',
-    },
-    init = function(plugin)
-      -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
-      require('lazy.core.loader').add_to_rtp(plugin)
-      require 'nvim-treesitter.query_predicates'
-    end,
-    cmd = { 'TSUpdateSync', 'TSUpdate', 'TSInstall' },
-    keys = {
-      { '<c-space>', desc = 'Increment Selection' },
-      { '<bs>', desc = 'Decrement Selection', mode = 'x' },
-    },
-    opts = {
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = false,
-        -- Disable for large files
-        disable = function(lang, buf)
-          local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-          if ok and stats and stats.size > max_filesize then
-            return true
-          end
-        end,
-      },
-      indent = { enable = true },
-      ensure_installed = {
+    lazy = false,
+    config = function()
+      if vim.fn.executable('tree-sitter') == 0 then
+        vim.notify(
+          "nvim-treesitter: 'tree-sitter' CLI not found. Please install it for parser updates.",
+          vim.log.levels.WARN
+        )
+      end
+
+      local ok, ts = pcall(require, 'nvim-treesitter')
+      if not ok or not ts.install then
+        -- Plugin hasn't switched to 'main' branch yet
+        return
+      end
+
+      ts.setup({})
+
+      local ensure_installed = {
         'bash',
         'c',
         'cpp',
@@ -65,51 +52,32 @@ return {
         'vimdoc',
         'xml',
         'yaml',
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = '<C-space>',
-          node_incremental = '<C-space>',
-          scope_incremental = false,
-          node_decremental = '<bs>',
-        },
-      },
-      textobjects = {
-        move = {
-          enable = true,
-          set_jumps = true,
-          goto_next_start = {
-            [']f'] = '@function.outer',
-            [']a'] = '@parameter.inner',
-            [']l'] = '@loop.outer',
-            [']i'] = '@conditional.outer',
-            [']s'] = '@statement.outer',
-            [']c'] = { query = '@code_cell.inner', desc = 'next code cell' },
-          },
-          goto_next_end = {
-            [']F'] = '@function.outer',
-            [']A'] = '@parameter.inner',
-            [']L'] = '@loop.outer',
-            [']I'] = '@conditional.outer',
-            [']S'] = '@statement.outer',
-          },
-          goto_previous_start = {
-            ['[f'] = '@function.outer',
-            ['[a'] = '@parameter.inner',
-            ['[l'] = '@loop.outer',
-            ['[i'] = '@conditional.outer',
-            ['[s'] = '@statement.outer',
-            ['[c'] = { query = '@code_cell.inner', desc = 'previous code cell' },
-          },
-          goto_previous_end = {
-            ['[F'] = '@function.outer',
-            ['[A'] = '@parameter.inner',
-            ['[L'] = '@loop.outer',
-            ['[I'] = '@conditional.outer',
-            ['[S'] = '@statement.outer',
-          },
-        },
+      }
+      ts.install(ensure_installed)
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
+    end,
+  },
+
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'main',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      local ok_move, move = pcall(require, 'nvim-treesitter-textobjects.move')
+      local ok_swap, swap = pcall(require, 'nvim-treesitter-textobjects.swap')
+      local ok_peek, peek = pcall(require, 'nvim-treesitter-textobjects.peek')
+
+      if not (ok_move and ok_swap and ok_peek) then
+        -- Plugin hasn't switched to 'main' branch yet
+        return
+      end
+
+      require('nvim-treesitter-textobjects').setup({
         select = {
           enable = true,
           lookahead = true,
@@ -130,7 +98,6 @@ return {
             ['iv'] = '@assignment.inner',
             ['ak'] = '@comment.outer',
             ['ik'] = '@comment.inner',
-
             ['ic'] = { query = '@code_cell.inner', desc = 'in cell' },
             ['ac'] = { query = '@code_cell.outer', desc = 'around cell' },
           },
@@ -140,82 +107,73 @@ return {
           },
           include_surrounding_whitespace = true,
         },
-        swap = {
-          enable = true,
-          swap_next = {
-            ['<leader>a'] = '@parameter.inner',
-            ['<leader>scl'] = '@code_cell.outer',
-          },
-          swap_previous = {
-            ['<leader>A'] = '@parameter.inner',
-            ['<leader>sch'] = '@code_cell.outer',
-          },
-        },
-        lsp_interop = {
-          enable = true,
-          border = 'rounded',
-          floating_preview_opts = {},
-          peek_definition_code = {
-            ['<leader>df'] = '@function.outer',
-            ['<leader>dF'] = '@class.outer',
-          },
-        },
-      },
-    },
-    config = function(_, opts)
-      -- Remove duplicates from ensure_installed
-      if type(opts.ensure_installed) == 'table' then
-        local seen = {}
-        local unique = {}
-        for _, lang in ipairs(opts.ensure_installed) do
-          if not seen[lang] then
-            seen[lang] = true
-            table.insert(unique, lang)
-          end
-        end
-        opts.ensure_installed = unique
-      end
+      })
 
-      require('nvim-treesitter.configs').setup(opts)
-
-      -- Diff mode fallback for textobjects move (migrated here for cleaner lifecycle)
-      local move = require 'nvim-treesitter.textobjects.move'
-      local configs = require 'nvim-treesitter.configs'
-      for name, fn in pairs(move) do
-        if name:find 'goto' == 1 then
-          move[name] = function(q, ...)
-            if vim.wo.diff then
-              local config = configs.get_module('textobjects.move')[name]
-              for key, query in pairs(config or {}) do
-                if q == query and key:find '[%]%[][cC]' then
-                  vim.cmd('normal! ' .. key)
-                  return
-                end
-              end
+      local function wrap_move(fn, query, desc)
+        return function()
+          if vim.wo.diff then
+            local key = query:match('[%]%[][cC]') and query or nil
+            if key then
+              vim.cmd('normal! ' .. key)
+              return
             end
-            return fn(q, ...)
           end
+          fn(query, 'textobjects')
         end
       end
+
+      local move_maps = {
+        [']f'] = { fn = move.goto_next_start, q = '@function.outer' },
+        [']a'] = { fn = move.goto_next_start, q = '@parameter.inner' },
+        [']l'] = { fn = move.goto_next_start, q = '@loop.outer' },
+        [']i'] = { fn = move.goto_next_start, q = '@conditional.outer' },
+        [']s'] = { fn = move.goto_next_start, q = '@statement.outer' },
+        [']c'] = { fn = move.goto_next_start, q = '@code_cell.inner', desc = 'next code cell' },
+        [']F'] = { fn = move.goto_next_end, q = '@function.outer' },
+        [']A'] = { fn = move.goto_next_end, q = '@parameter.inner' },
+        [']L'] = { fn = move.goto_next_end, q = '@loop.outer' },
+        [']I'] = { fn = move.goto_next_end, q = '@conditional.outer' },
+        [']S'] = { fn = move.goto_next_end, q = '@statement.outer' },
+        ['[f'] = { fn = move.goto_previous_start, q = '@function.outer' },
+        ['[a'] = { fn = move.goto_previous_start, q = '@parameter.inner' },
+        ['[l'] = { fn = move.goto_previous_start, q = '@loop.outer' },
+        ['[i'] = { fn = move.goto_previous_start, q = '@conditional.outer' },
+        ['[s'] = { fn = move.goto_previous_start, q = '@statement.outer' },
+        ['[c'] = { fn = move.goto_previous_start, q = '@code_cell.inner', desc = 'previous code cell' },
+        ['[F'] = { fn = move.goto_previous_end, q = '@function.outer' },
+        ['[A'] = { fn = move.goto_previous_end, q = '@parameter.inner' },
+        ['[L'] = { fn = move.goto_previous_end, q = '@loop.outer' },
+        ['[I'] = { fn = move.goto_previous_end, q = '@conditional.outer' },
+        ['[S'] = { fn = move.goto_previous_end, q = '@statement.outer' },
+      }
+
+      for key, map in pairs(move_maps) do
+        vim.keymap.set({ 'n', 'x', 'o' }, key, wrap_move(map.fn, map.q, map.desc), { desc = map.desc })
+      end
+
+      vim.keymap.set('n', '<leader>a', function() swap.swap_next('@parameter.inner') end, { desc = 'Swap next parameter' })
+      vim.keymap.set('n', '<leader>scl', function() swap.swap_next('@code_cell.outer') end, { desc = 'Swap next cell' })
+      vim.keymap.set('n', '<leader>A', function() swap.swap_previous('@parameter.inner') end, { desc = 'Swap previous parameter' })
+      vim.keymap.set('n', '<leader>sch', function() swap.swap_previous('@code_cell.outer') end, { desc = 'Swap previous cell' })
+
+      vim.keymap.set('n', '<leader>df', function() peek.Peek_definition_code('@function.outer') end, { desc = 'Peek function definition' })
+      vim.keymap.set('n', '<leader>dF', function() peek.Peek_definition_code('@class.outer') end, { desc = 'Peek class definition' })
     end,
   },
 
-  -- Enhanced commenting with treesitter context
   {
     'folke/ts-comments.nvim',
     opts = {},
     event = 'VeryLazy',
-    enabled = vim.fn.has 'nvim-0.10.0' == 1,
+    enabled = vim.fn.has('nvim-0.10.0') == 1,
   },
 
-  -- Rainbow delimiters for better bracket visibility
   {
     'HiPhish/rainbow-delimiters.nvim',
     enabled = false,
     event = { 'BufReadPre', 'BufNewFile' },
-    -- Moved configuration to `init` since it relies on a global variable
     init = function()
-      local rainbow_delimiters = require 'rainbow-delimiters'
+      local rainbow_delimiters = require('rainbow-delimiters')
       vim.g.rainbow_delimiters = {
         strategy = {
           [''] = rainbow_delimiters.strategy['global'],
