@@ -35,6 +35,21 @@ return {
 			require("mini.notify").setup()
 			require("mini.sessions").setup()
 			require("mini.starter").setup()
+			require("mini.files").setup({ windows = { preview = true } })
+			vim.keymap.set("n", "<leader>e", function()
+				MiniFiles.open(vim.api.nvim_buf_get_name(0), true)
+			end, { desc = "Open mini.files" })
+			vim.keymap.set("n", "<leader>E", function()
+				MiniFiles.open(vim.fn.getcwd(), true)
+			end, { desc = "Open mini.files (cwd)" })
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "MiniFilesExplorerOpen",
+				callback = function()
+					MiniFiles.set_bookmark("c", vim.fn.stdpath("config"), { desc = "Config" })
+					MiniFiles.set_bookmark("p", vim.fn.stdpath("data") .. "/lazy", { desc = "Plugins" })
+					MiniFiles.set_bookmark("w", vim.fn.getcwd, { desc = "Working directory" })
+				end,
+			})
 			-- ── Statusline highlights ────────────────────────────────────────────
 			local function hi(name, opts)
 				vim.api.nvim_set_hl(0, name, opts)
@@ -216,6 +231,7 @@ return {
 				show_icons = true,
 				section = "left",
 			})
+			vim.opt.showtabline = 1
 			-- require("mini.git").setup()
 			require("mini.indentscope").setup({ symbol = "▎" })
 
@@ -224,17 +240,6 @@ return {
 			vim.api.nvim_create_autocmd("BufReadPre", {
 				once = true,
 				callback = function()
-					-- Files
-					require("mini.files").setup({ windows = { preview = true } })
-					vim.api.nvim_create_autocmd("User", {
-						pattern = "MiniFilesExplorerOpen",
-						callback = function()
-							MiniFiles.set_bookmark("c", vim.fn.stdpath("config"), { desc = "Config" })
-							MiniFiles.set_bookmark("p", vim.fn.stdpath("data") .. "/lazy", { desc = "Plugins" })
-							MiniFiles.set_bookmark("w", vim.fn.getcwd, { desc = "Working directory" })
-						end,
-					})
-
 					-- Misc
 					require("mini.misc").setup()
 					MiniMisc.setup_auto_root()
