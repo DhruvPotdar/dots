@@ -1,108 +1,117 @@
--- LazyVim auto format
-vim.g.autoformat = true
+-- Make Mason-installed binaries available to vim.lsp.start (not in shell PATH by default)
+vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin:" .. vim.env.PATH
 
--- Snacks animations
--- Set to `false` to globally disable all snacks animations
-vim.g.snacks_animate = true
-
--- if the completion engine supports the AI source,
--- use that instead of inline suggestions
-vim.g.ai_cmp = true
-
+-- Options organized by usage for readability and maintenance
 -- LazyVim root dir detection
 -- Each entry can be:
 -- * the name of a detector function like `lsp` or `cwd`
 -- * a pattern or array of patterns like `.git` or `lua`.
 -- * a function with signature `function(buf) -> string|string[]`
-vim.g.root_spec = { 'lsp', { '.git', 'lua' }, 'cwd' }
-
--- Set LSP servers to be ignored when used with `util.root.detectors.lsp`
--- for detecting the LSP root
-vim.g.root_lsp_ignore = { 'copilot' }
-
--- Hide deprecation warnings
-vim.g.deprecation_warnings = true
-
--- Show the current document symbols location from Trouble in lualine
--- You can disable this for a buffer by setting `vim.b.trouble_lualine = false`
-vim.g.trouble_lualine = true
+vim.g.root_spec = { "lsp", { ".git", "lua" }, "cwd" }
 
 local opt = vim.opt
-
-opt.autowrite = true -- Enable auto write
--- only set clipboard if not in ssh, to make sure the OSC 52
--- integration works automatically. Requires Neovim >= 0.10.0
+-- ======= Clipboard =======
+-- Only enable system clipboard when not in SSH to preserve OSC52 behavior.
+-- Requires Neovim >= 0.10.0 for reliable OSC52.
 vim.schedule(function()
-  opt.clipboard = vim.env.SSH_TTY and '' or 'unnamedplus' -- Sync with system clipboard
+	opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
 end)
-opt.completeopt = 'menu,menuone,noselect'
-opt.conceallevel = 2 -- Hide * markup for bold and italic, but not markers with substitutions
-opt.confirm = true -- Confirm to save changes before exiting modified buffer
-opt.cursorline = true -- Enable highlighting of the current line
--- opt.cursorcolumn = true
-opt.expandtab = true -- Use spaces instead of tabs
+
+-- ======= Files / Persistence =======
+opt.autowrite = true -- Automatically save changes when switching buffers
+opt.undofile = true -- Enable persistent undo
+opt.undolevels = 10000
+opt.hidden = true -- Allow switching away from modified buffers without saving
+opt.swapfile = false -- Don't create swap files
+opt.hidden = true -- Remove unnamed buffer
+opt.backup = false -- Disable backup files
+opt.writebackup = false -- Disable write backup
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+
+-- ======= UI / Display =======
+opt.termguicolors = true -- True color support
+opt.laststatus = 3 -- Global statusline across windows
+opt.showmode = false -- Mode shown in statusline, no need for builtin
+opt.signcolumn = "yes" -- Enable signcolumn for gitsigns
+opt.number = true
+opt.relativenumber = true
+opt.cursorline = true -- Highlight the current line
+opt.cmdheight = 0
+-- opt.cursorcolumn = true -- Uncomment if column highlight is desired
+opt.ruler = false -- Disable classic ruler; statusline handles this
+opt.linebreak = true -- Wrap at convenient points (no mid-word wraps)
+opt.wrap = true -- Enable wrapping for long lines
+opt.list = false -- Show some invisible characters (tabs, trailing spaces)
+opt.pumheight = 10 -- Completion popup max entries
+opt.pumblend = 0 -- Popup blend (transparency)
+opt.winminwidth = 5 -- Minimal window width
+opt.winborder = "rounded" -- Window border style for floating windows
+opt.conceallevel = 2 -- Conceal formatting markers (markdown, etc.)
+vim.o.breakindentopt = "list:-1" -- Add padding for lists (if 'wrap' is set)
+
+-- opt.formatoptions = 'jcroqlnt' -- tcqj
+-- Fill characters (visual polish)
 opt.fillchars = {
-  foldopen = '',
-  foldclose = '',
-  fold = ' ',
-  foldsep = ' ',
-  diff = '╱',
-  eob = ' ',
+	foldopen = "",
+	foldclose = "",
+	fold = " ",
+	foldsep = " ",
+	diff = "╱",
+	eob = " ",
 }
+
+-- Cursor shape and blinking in different modes
+opt.guicursor =
+	"n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
+-- ======= Editing / Indentation =======
+opt.expandtab = true -- Use spaces instead of tabs
+opt.shiftwidth = 4 -- Indent size for >, < commands
+opt.tabstop = 4 -- Number of spaces a <Tab> in file counts for
+opt.shiftround = true -- Round indentation to shiftwidth
+opt.smartindent = true -- Smart autoindenting for new lines
+opt.smartcase = true -- Smart case for searches (combined with ignorecase)
+opt.spelllang = { "en" }
+
+-- ======= Folding (Treesitter-based) =======
+-- Use expression-based folding driven by treesitter; start unfolded
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true
-opt.foldmethod = 'expr'
-opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
--- opt.formatexpr = "v:lua.require'radtop.utils'.formatexpr()"
--- opt.formatoptions = 'jcroqlnt' -- tcqj
-opt.grepformat = '%f:%l:%c:%m'
-opt.grepprg = 'rg --vimgrep'
-opt.ignorecase = true -- Ignore case
-opt.inccommand = 'split' -- preview incremental substitute
-opt.jumpoptions = 'view'
-opt.laststatus = 3 -- global statusline
-opt.linebreak = true -- Wrap lines at convenient points
-opt.list = true -- Show some invisible characters (tabs...
-opt.mouse = 'a' -- Enable mouse mode
-opt.number = true -- Print line number
-opt.pumblend = 0 -- Popup blend
-opt.pumheight = 10 -- Maximum number of entries in a popup
-opt.relativenumber = true -- Relative line numbers
-opt.ruler = false -- Disable the default ruler
-opt.scrolloff = 15 -- Lines of context
-opt.sessionoptions = { 'buffers', 'curdir', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp', 'folds' }
-opt.shiftround = true -- Round indent
-opt.shiftwidth = 4 -- Size of an indent
-opt.shortmess:append { W = true, I = true, c = true, C = true }
-opt.showmode = false -- Dont show mode since we have a statusline
-opt.sidescrolloff = 8 -- Columns of context
-opt.signcolumn = 'yes' -- Always show the signcolumn, otherwise it would shift the text each time
-opt.smartcase = true -- Don't ignore case with capitals
-opt.smartindent = true -- Insert indents automatically
-opt.spelllang = { 'en' }
-opt.splitbelow = false -- Put new windows below current
-opt.splitkeep = 'screen'
-opt.splitright = true -- Put new windows right of current
--- opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
-opt.tabstop = 4 -- Number of spaces tabs count for
-opt.termguicolors = true -- True color support
-opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Lower than default (1000) to quickly trigger which-key
-opt.undofile = true
-opt.undolevels = 10000
-opt.updatetime = 200 -- Save swap file and trigger CursorHold
-opt.virtualedit = 'block' -- Allow cursor to move where there is no text in visual block mode
-opt.wildmode = 'longest:full,full' -- Command-line completion mode
-opt.winminwidth = 5 -- Minimum window width
-opt.wrap = true -- Enable line wrap
--- opt.smoothscroll = true
 
--- Fix markdown indentation settings
+-- ======= Searching =======
+opt.grepformat = "%f:%l:%c:%m"
+opt.grepprg = "rg --vimgrep"
+opt.ignorecase = true -- Case-insensitive by default
+opt.smartcase = true -- ...but respect uppercase in query
+opt.inccommand = "split" -- Live preview for substitutions
+opt.jumpoptions = "view"
+opt.wildmenu = false -- disabled in favour of blink.cmp cmdline completion
+opt.completeopt = "menu,menuone,noselect" -- Comfortable completion UI
+
+-- ======= Window management / Splits =======
+opt.splitright = true -- New window to the right
+opt.splitbelow = false -- Keep new windows above by default (false)
+opt.splitkeep = "screen"
+opt.sidescrolloff = 8 -- Horizontal context columns
+opt.scrolloff = 15 -- Vertical context lines
+
+-- ======= Mouse / Input =======
+opt.mouse = "a" -- Enable mouse support in all modes
+opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Short timeout for mapped sequences
+
+-- ======= Performance / UX tweaks =======
+opt.updatetime = 300 -- Faster CursorHold and swap writing
+opt.virtualedit = "block" -- Allow visual block cursor beyond EOL in block mode
+
+-- ======= Misc / Language specific tweaks =======
+-- Fix markdown indentation settings recommended by some plugins
 vim.g.markdown_recommended_style = 0
 
--- Remove the hidden buffer
-opt.hidden = true
+-- Optional/placeholder settings (commented out for clarity)
+-- opt.formatexpr = "v:lua.require'radtop.utils'.formatexpr()"
+-- opt.formatoptions = 'jcroqlnt' -- tcqj
+-- opt.smoothscroll = true
 
--- Border
-opt.winborder = 'none'
-opt.guicursor = 'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
+-- Diagnostic config lives in lua/radtop/lsp.lua (consolidated there)

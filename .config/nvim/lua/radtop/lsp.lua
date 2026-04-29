@@ -1,283 +1,198 @@
--- Define icons used throughout the config
-local icons = require 'radtop.icons'
+local M = {}
+function M.setup()
+	-- Diagnostic configuration
+	vim.diagnostic.config({
+		virtual_text = false,
+		signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = " ",
+				[vim.diagnostic.severity.WARN] = " ",
+				[vim.diagnostic.severity.INFO] = "󰋽 ",
+				[vim.diagnostic.severity.HINT] = " ",
+			},
+		},
+		underline = false,
+		update_in_insert = false,
+		severity_sort = true,
+		float = {
+			border = "rounded",
+			source = "always",
+		},
+	})
 
--- Define helper functions for rename and notifications
-local function on_rename(from, to)
-  local clients = vim.lsp.get_clients()
-  for _, client in ipairs(clients) do
-    if client:supports_method 'workspace/willRenameFiles' then
-      local resp = client.request_sync('workspace/willRenameFiles', {
-        files = {
-          {
-            oldUri = vim.uri_from_fname(from),
-            newUri = vim.uri_from_fname(to),
-          },
-        },
-      }, 1000, 0)
-      if resp and resp.result ~= nil then
-        vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding)
-      end
-    end
-    if client:supports_method 'workspace/didRenameFiles' then
-      client.notify('workspace/didRenameFiles', {
-        files = {
-          {
-            oldUri = vim.uri_from_fname(from),
-            newUri = vim.uri_from_fname(to),
-          },
-        },
-      })
-    end
-  end
+	-- LSP Attach behavior
+	vim.api.nvim_create_autocmd("LspAttach", {
+		callback = function(args)
+			local bufnr = args.buf
+			local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+			local function map(mode, lhs, rhs, desc)
+				vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+			end
+
+			-- Basic LSP mappings
+			map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+			map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
+			map({ "n", "v" }, "<leader>ca", function()
+				require("fzf-lua").lsp_code_actions()
+			end, "Code Actions")
+			map("n", "<leader>cr", vim.lsp.buf.rename, "Rename Symbol")
+			map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
+
+			-- Inlay hints
+			if client and client:supports_method("textDocument/inlayHint") then
+				vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+				map("n", "<leader>uh", function()
+					vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }))
+				end, "Toggle Inlay Hints")
+			end
+		end,
+	})
+
+	-- Server configurations
+	local capabilities = {}
+	if pcall(require, "blink.cmp") then
+		capabilities = require("blink.cmp").get_lsp_capabilities()
+	end
+
+	local servers = {
+		python = {
+			cmd = { "ty", "server" },
+			root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git", "venv", ".venv" },
+		},
+		cpp = {
+			cmd = { "clangd", "--background-index", "--clang-tidy", "--header-insertion=iwyu" },
+			root_markers = { ".clangd", "compile_commands.json", "compile_flags.txt", ".git" },
+			capabilities = { offsetEncoding = { "utf-16" } },
+		},
+		rust = {
+			cmd = { "rust-analyzer" },
+			root_markers = { "Cargo.toml", ".git" },
+			settings = {
+				["rust-analyzer"] = {
+					cargo = { allFeatures = true },
+					checkOnSave = { command = "clippy" },
+					inlayHints = {
+						bindingModeHints = { enabled = true },
+						chainingHints = { enabled = true },
+						closingBraceHints = { enabled = true },
+						closureReturnTypeHints = { enabled = "always" },
+						lifetimeElisionHints = { enabled = "always", useParameterNames = true },
+						parameterHints = { enabled = true },
+						reborrowHints = { enabled = "always" },
+						renderColons = { enabled = true },
+						typeHints = { enabled = true },
+					},
+				},
+			},
+		},
+		toml = {
+			cmd = { "taplo", "lsp", "stdio" },
+			root_markers = { ".git", "Cargo.toml" },
+		},
+		markdown = {
+			cmd = { "marksman", "server" },
+			root_markers = { ".marksman.toml", ".git" },
+		},
+		yaml = {
+			cmd = { "yaml-language-server", "--stdio" },
+			root_markers = { ".git" },
+		},
+		bash = {
+			cmd = { "bash-language-server", "start" },
+			root_markers = { ".git" },
+		},
+		fish = {
+			cmd = { "fish-lsp", "start" },
+			root_markers = { ".git" },
+		},
+		lua = {
+			cmd = { "lua-language-server" },
+			root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
+			settings = {
+				Lua = {
+					runtime = { version = "LuaJIT" },
+					diagnostics = { globals = { "vim" } },
+					workspace = { checkThirdParty = false, library = { vim.env.VIMRUNTIME } },
+					telemetry = { enabled = false },
+					hint = { enable = true },
+				},
+			},
+		},
+	}
+
+	-- Auto-start LSPs based on FileType
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = vim.tbl_keys(servers),
+		callback = function(args)
+			local config = servers[args.match]
+			if not config then
+				return
+			end
+
+			local root_dir = vim.fs.root(args.buf, config.root_markers)
+			if root_dir then
+				vim.lsp.start({
+					name = args.match,
+					cmd = config.cmd,
+					root_dir = root_dir,
+					capabilities = vim.tbl_deep_extend("force", capabilities, config.capabilities or {}),
+					settings = config.settings,
+				})
+			end
+		end,
+	})
+
+	-- User Commands
+	vim.api.nvim_create_user_command("LspInfo", function()
+		local clients = vim.lsp.get_clients()
+		if #clients == 0 then
+			vim.notify("No active LSP clients", vim.log.levels.WARN)
+			return
+		end
+		local msg = { "Active LSP Clients:" }
+		for _, client in ipairs(clients) do
+			table.insert(
+				msg,
+				string.format("- %s (id: %d, root: %s)", client.name, client.id, client.config.root_dir or "none")
+			)
+		end
+		vim.notify(table.concat(msg, "\n"), vim.log.levels.INFO)
+	end, { desc = "Show active LSP clients" })
+
+	vim.api.nvim_create_user_command("LspRestart", function()
+		local clients = vim.lsp.get_clients({ bufnr = 0 })
+		if #clients == 0 then
+			vim.notify("No LSP clients attached to this buffer", vim.log.levels.WARN)
+			return
+		end
+		for _, client in ipairs(clients) do
+			local name = client.name
+			local config = client.config
+			client.stop()
+			vim.defer_fn(function()
+				vim.lsp.start(config)
+				vim.notify("Restarted " .. name, vim.log.levels.INFO)
+			end, 500)
+		end
+	end, { desc = "Restart LSP clients for current buffer" })
+
+	vim.api.nvim_create_user_command("LspStop", function()
+		local clients = vim.lsp.get_clients({ bufnr = 0 })
+		for _, client in ipairs(clients) do
+			client.stop()
+			vim.notify("Stopped " .. client.name, vim.log.levels.INFO)
+		end
+	end, { desc = "Stop LSP clients for current buffer" })
+
+	vim.api.nvim_create_user_command("LspStart", function()
+		vim.cmd("doautocmd FileType")
+		vim.notify("Triggered LSP start logic", vim.log.levels.INFO)
+	end, { desc = "Manually trigger LSP start logic" })
+
+	vim.api.nvim_create_user_command("LspLog", function()
+		vim.cmd("edit " .. vim.lsp.get_log_path())
+	end, { desc = "Open LSP log" })
 end
 
-local function rename_file()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local old = vim.api.nvim_buf_get_name(bufnr)
-  if old == '' or old == nil then
-    return
-  end
-  local stat = vim.uv.fs_stat(old)
-  local is_file = stat and stat.type == 'file'
-  local root = vim.uv.cwd() -- Use current working directory as root; adjust if needed (e.g., vim.fs.root(0, {".git"}))
-  local old_rel = old:sub(#root + 2) -- Skip the leading '/'
-  local prompt = is_file and 'Rename File' or 'Rename Dir'
-  local new_rel = vim.fn.input(prompt .. ' ', old_rel, is_file and 'file' or 'dir')
-  if new_rel == old_rel or new_rel == '' or new_rel == nil then
-    return
-  end
-  local new = root .. '/' .. new_rel
-  vim.fn.mkdir(vim.fs.dirname(new), 'p')
-  on_rename(old, new)
-  if is_file then
-    vim.api.nvim_buf_set_name(bufnr, new)
-    vim.cmd.write()
-  else
-    local buffers = vim.api.nvim_list_bufs()
-    for _, buf in ipairs(buffers) do
-      local name = vim.api.nvim_buf_get_name(buf)
-      if vim.startswith(name, old) then
-        vim.api.nvim_buf_set_name(buf, new .. name:sub(#old + 1))
-      end
-    end
-  end
-  local ok, err = vim.uv.fs_rename(old, new)
-  if not ok then
-    vim.notify('Failed to rename ' .. old .. ' to ' .. new .. ': ' .. (err or 'unknown error'), vim.log.levels.ERROR)
-    return
-  end
-  if is_file then
-    vim.cmd.edit()
-  else
-    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-      if vim.startswith(vim.api.nvim_buf_get_name(buf), new) then
-        vim.api.nvim_buf_call(buf, vim.cmd.update)
-      end
-    end
-  end
-end
-
--- Define source action helper
-local function source_action()
-  vim.lsp.buf.code_action {
-    context = {
-      only = { 'source' },
-    },
-  }
-end
-
--- Define words module for reference jumping
-local words = {}
-words.enabled = true
-
-function words.jump(count, to_end)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local ns = vim.api.nvim_get_namespaces()['vim_lsp_references']
-  if not ns then
-    return
-  end
-  local highlights = vim.api.nvim_buf_get_extmarks(bufnr, ns, 0, -1, { details = true })
-  if #highlights == 0 then
-    return
-  end
-  local pos = vim.api.nvim_win_get_cursor(0)
-  local function hl_filter(hl)
-    local row = hl[2]
-    local start_col = hl[3]
-    local detail = hl[4]
-    local end_row = detail.end_row
-    local end_col = detail.end_col
-    if to_end then
-      return row > pos[1] - 1 or (row == pos[1] - 1 and end_col > pos[2])
-    end
-    return row > pos[1] - 1 or (row == pos[1] - 1 and start_col > pos[2])
-  end
-  table.sort(highlights, function(a, b)
-    if a[2] ~= b[2] then
-      return a[2] < b[2]
-    end
-    return a[3] < b[3]
-  end)
-  local filtered = vim.tbl_filter(hl_filter, highlights)
-  if count < 0 then
-    filtered = vim.tbl_filter(function(hl)
-      return not hl_filter(hl)
-    end, highlights)
-    table.sort(filtered, function(a, b)
-      if a[2] ~= b[2] then
-        return a[2] > b[2]
-      end
-      return a[3] > b[3]
-    end)
-    count = math.abs(count)
-  end
-  local target = filtered[count] or filtered[#filtered]
-  if not target then
-    return
-  end
-  vim.api.nvim_win_set_cursor(0, { target[2] + 1, target[3] })
-end
-
-function words.is_enabled()
-  return words.enabled
-end
-
--- Setup autocmds for words (document highlight)
-vim.api.nvim_create_augroup('LspWords', { clear = true })
-vim.api.nvim_create_autocmd('CursorHold', {
-  group = 'LspWords',
-  callback = function()
-    if words.enabled then
-      vim.lsp.buf.document_highlight()
-    end
-  end,
-})
-vim.api.nvim_create_autocmd('CursorMoved', {
-  group = 'LspWords',
-  callback = vim.lsp.buf.clear_references,
-})
-
--- Define LSP keymaps module
-local lsp_keymaps = {}
-lsp_keymaps._keys = nil
-
----@return table[]
-function lsp_keymaps.get()
-  if lsp_keymaps._keys then
-    return lsp_keymaps._keys
-  end
-  lsp_keymaps._keys = {
-    { '<leader>cl', vim.cmd.LspInfo, desc = 'Lsp Info' },
-    { 'gd', vim.lsp.buf.definition, desc = 'Goto Definition', has = 'definition' },
-    { 'gr', vim.lsp.buf.references, desc = 'References', nowait = true },
-    { 'gI', vim.lsp.buf.implementation, desc = 'Goto Implementation' },
-    { 'gy', vim.lsp.buf.type_definition, desc = 'Goto T[y]pe Definition' },
-    { 'gD', vim.lsp.buf.declaration, desc = 'Goto Declaration' },
-    { 'K', vim.lsp.buf.hover, desc = 'Hover' },
-    { 'gK', vim.lsp.buf.signature_help, desc = 'Signature Help', has = 'signatureHelp' },
-    { '<c-k>', vim.lsp.buf.signature_help, mode = 'i', desc = 'Signature Help', has = 'signatureHelp' },
-    { '<leader>ca', vim.lsp.buf.code_action, desc = 'Code Action', mode = { 'n', 'v' }, has = 'codeAction' },
-    { '<leader>cc', vim.lsp.codelens.run, desc = 'Run Codelens', mode = { 'n', 'v' }, has = 'codeLens' },
-    { '<leader>cC', vim.lsp.codelens.enable, desc = 'Refresh & Display Codelens', mode = { 'n' }, has = 'codeLens' },
-    { '<leader>cR', rename_file, desc = 'Rename File', mode = { 'n' }, has = { 'workspace/didRenameFiles', 'workspace/willRenameFiles' } },
-    { '<leader>cr', vim.lsp.buf.rename, desc = 'Rename', has = 'rename' },
-    { '<leader>cA', source_action, desc = 'Source Action', has = 'codeAction' },
-    {
-      ']]',
-      function()
-        words.jump(vim.v.count1)
-      end,
-      has = 'documentHighlight',
-      desc = 'Next Reference',
-      cond = words.is_enabled,
-    },
-    {
-      '[[',
-      function()
-        words.jump(-vim.v.count1)
-      end,
-      has = 'documentHighlight',
-      desc = 'Prev Reference',
-      cond = words.is_enabled,
-    },
-    {
-      '<a-n>',
-      function()
-        words.jump(vim.v.count1, true)
-      end,
-      has = 'documentHighlight',
-      desc = 'Next Reference',
-      cond = words.is_enabled,
-    },
-    {
-      '<a-p>',
-      function()
-        words.jump(-vim.v.count1, true)
-      end,
-      has = 'documentHighlight',
-      desc = 'Prev Reference',
-      cond = words.is_enabled,
-    },
-  }
-  return lsp_keymaps._keys
-end
-
-function lsp_keymaps.has(buffer, method)
-  if type(method) == 'table' then
-    for _, m in ipairs(method) do
-      if lsp_keymaps.has(buffer, m) then
-        return true
-      end
-    end
-    return false
-  end
-  method = method:find '/' and method or 'textDocument/' .. method
-  local clients = vim.lsp.get_clients { bufnr = buffer }
-  for _, client in ipairs(clients) do
-    if client:supports_method(method) then
-      return true
-    end
-  end
-  return false
-end
-
-function lsp_keymaps.resolve(buffer)
-  local spec = lsp_keymaps.get()
-  -- Add per-server keys here if needed (e.g., from a local opts.servers table)
-  local opts = { servers = {} } -- Placeholder; populate if you have server-specific keys
-  local clients = vim.lsp.get_clients { bufnr = buffer }
-  for _, client in ipairs(clients) do
-    local maps = opts.servers[client.name] and opts.servers[client.name].keys or {}
-    vim.list_extend(spec, maps)
-  end
-  return spec
-end
-
-function lsp_keymaps.on_attach(client, buffer)
-  local keymaps = lsp_keymaps.resolve(buffer)
-  for _, keys in ipairs(keymaps) do
-    local has = not keys.has or lsp_keymaps.has(buffer, keys.has)
-    local cond = not keys.cond or (type(keys.cond) == 'function' and keys.cond()) or keys.cond
-    if has and cond then
-      local map_opts = {
-        desc = keys.desc,
-        silent = true,
-        buffer = buffer,
-        nowait = keys.nowait,
-      }
-      vim.keymap.set(keys.mode or 'n', keys[1], keys[2], map_opts)
-    end
-  end
-  -- Optional: Autoformat on save using LSP
-  vim.api.nvim_create_autocmd('BufWritePre', {
-    buffer = buffer,
-    callback = function()
-      vim.lsp.buf.format {
-        bufnr = buffer,
-        filter = function(c)
-          return c.name ~= 'copilot'
-        end, -- Example filter; adjust as needed
-      }
-    end,
-  })
-end
+return M

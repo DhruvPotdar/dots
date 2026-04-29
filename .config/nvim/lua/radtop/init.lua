@@ -1,4 +1,5 @@
-require 'radtop.lazy'
-require 'radtop.options'
-require 'radtop.autocmds'
-require 'radtop.keymaps'
+require("radtop.lazy")
+require("radtop.options")
+require("radtop.autocmds")
+require("radtop.keymaps")
+require("radtop.lsp").setup()
