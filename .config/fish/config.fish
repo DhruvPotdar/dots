@@ -19,12 +19,16 @@ alias cat bat
 alias lg lazygit
 # alias btop 'btop --force-utf'
 abbr fconf 'nvim ~/.config/fish/config.fish'
+abbr sconf 'nvim ~/.ssh/config'
 
 set -gx EDITOR nvim
 set -x MANPAGER "nvim +Man!"
 set -x MANWIDTH 999
 
 alias cls clear
+
+alias mvim "NVIM_APPNAME=nvim-minimax nvim"
+alias gvim "NVIM_APPNAME=gvim nvim"
 
 abbr gs "git status"
 
