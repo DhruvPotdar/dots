@@ -46,6 +46,7 @@ map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result
 
 -- save file
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
+vim.api.nvim_create_user_command("W", "noautocmd w", { desc = "Save without autocommands" })
 
 -- better indenting
 map("v", "<", "<gv")
