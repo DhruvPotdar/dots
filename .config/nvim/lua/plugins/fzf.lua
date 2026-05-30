@@ -220,13 +220,6 @@ return {
       { '<leader>fq', '<cmd>FzfLua quickfix<cr>', desc = 'Quickfix List' },
       { '<leader>cC', '<cmd>FzfLua colorschemes<cr>', desc = 'Colorscheme with Preview' },
 
-      -- LSP Ported from autocmds
-      { 'gr', '<cmd>FzfLua lsp_references<cr>', desc = 'Goto References' },
-      { 'gi', '<cmd>FzfLua lsp_implementations<cr>', desc = 'Goto Implementation' },
-      { 'gd', '<cmd>FzfLua lsp_definitions<cr>', desc = 'Goto Definition' },
-      { 'gO', '<cmd>FzfLua lsp_document_symbols<cr>', desc = 'Document Symbols' },
-      { 'gW', '<cmd>FzfLua lsp_live_workspace_symbols<cr>', desc = 'Workspace Symbols' },
-
       -- Suggested additional pickers (10+)
       { '<leader>f/', '<cmd>FzfLua blines<cr>', desc = 'Grep Current Buffer' },
       { '<leader>fL', '<cmd>FzfLua lines<cr>', desc = 'Grep All Open Buffers' },

@@ -2,7 +2,11 @@ local M = {}
 function M.setup()
 	-- Diagnostic configuration
 	vim.diagnostic.config({
-		virtual_text = false,
+		virtual_text = {
+			spacing = 4,
+			prefix = "●",
+			current_line = true,
+		},
 		signs = {
 			text = {
 				[vim.diagnostic.severity.ERROR] = " ",
@@ -30,14 +34,17 @@ function M.setup()
 				vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
 			end
 
-			-- Basic LSP mappings
-			map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
-			map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
-			map({ "n", "v" }, "<leader>ca", function()
-				require("fzf-lua").lsp_code_actions()
-			end, "Code Actions")
-			map("n", "<leader>cr", vim.lsp.buf.rename, "Rename Symbol")
-			map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
+			map("n", "gd", function()
+				require("fzf-lua").lsp_definitions()
+			end, "Goto Definition")
+			map("n", "grr", function()
+				require("fzf-lua").lsp_references()
+			end, "Goto References")
+			map("n", "grD", vim.lsp.buf.declaration, "Goto Declaration")
+			map("n", "gry", vim.lsp.buf.type_definition, "Goto Type Definition")
+			map("n", "grW", function()
+				require("fzf-lua").lsp_live_workspace_symbols()
+			end, "Workspace Symbols")
 
 			-- Inlay hints
 			if client and client:supports_method("textDocument/inlayHint") then

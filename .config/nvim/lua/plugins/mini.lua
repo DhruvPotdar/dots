@@ -36,8 +36,16 @@ return {
 			require("mini.sessions").setup()
 			require("mini.starter").setup()
 			require("mini.files").setup({ windows = { preview = true } })
+			local function mini_files_start_path()
+				local bufname = vim.api.nvim_buf_get_name(0)
+				local realpath = vim.uv.fs_realpath(bufname)
+				if realpath then
+					return realpath
+				end
+				return vim.fn.getcwd()
+			end
 			vim.keymap.set("n", "<leader>e", function()
-				MiniFiles.open(vim.api.nvim_buf_get_name(0), true)
+				MiniFiles.open(mini_files_start_path(), true)
 			end, { desc = "Open mini.files" })
 			vim.keymap.set("n", "<leader>E", function()
 				MiniFiles.open(vim.fn.getcwd(), true)
@@ -83,6 +91,7 @@ return {
 					hi(m[1], { fg = m[2], bg = "none", bold = true })
 					hi(m[1] .. "Sep", { fg = m[2], bg = "none" })
 				end
+				hi("MiniStatuslineModeRecording", { fg = "#E46876", bg = "none", bold = true })
 				hi("MiniStatuslineLocation", { fg = c.loc_fg, bg = "none", bold = true })
 				hi("MiniStatuslineLocationSep", { fg = c.loc_bg, bg = "none" })
 				hi("MiniStatuslineFolder", { fg = c.folder, bg = "none" })
@@ -137,11 +146,11 @@ return {
 							end
 						end
 
-						-- Git branch from mini.git
-						local branch = (vim.b.minigit_summary or {}).head_name or ""
+						-- Git branch from gitsigns
+						local gs = vim.b.gitsigns_status_dict or {}
+						local branch = gs.head or ""
 
 						-- Git diff stats from gitsigns
-						local gs = vim.b.gitsigns_status_dict or {}
 						local diff_parts = {}
 						if (gs.added or 0) > 0 then
 							table.insert(diff_parts, h("MiniStatuslineGitAdd") .. "󰐖 " .. gs.added)
@@ -166,6 +175,12 @@ return {
 						-- Mode (no background)
 						local s_mode = h(mode_hl) .. " " .. mode .. " "
 
+						-- Macro recording
+						local recording_reg = vim.fn.reg_recording()
+						local s_macro = recording_reg ~= ""
+								and (h("MiniStatuslineModeRecording") .. " Recording @" .. recording_reg .. " ")
+							or ""
+
 						-- Left sections (no bg)
 						local s_folder = h("MiniStatuslineFolder") .. " " .. dir_icon .. cwd
 						local s_diag = #diag_parts > 0 and ("  " .. table.concat(diag_parts, " ")) or ""
@@ -182,7 +197,7 @@ return {
 
 						-- Right sections (no bg)
 						local s_gitstatus = #diff_parts > 0 and table.concat(diff_parts, " ") or ""
-						local s_gitbranch = branch ~= "" and (h("MiniStatuslineGitBranch") .. "  " .. branch) or ""
+						local s_gitbranch = branch ~= "" and (h("MiniStatuslineGitBranch") .. " 󰊢 " .. branch) or ""
 
 						-- Location with TOP/BOT indicator and icon
 						local line = vim.fn.line(".")
@@ -208,6 +223,7 @@ return {
 
 						return table.concat({
 							s_mode,
+							s_macro,
 							pad(s_folder),
 							s_diag,
 							"%=",
@@ -227,11 +243,23 @@ return {
 				},
 				use_icons = true,
 			})
+
+			-- Refresh statusline on macro recording
+			vim.api.nvim_create_autocmd("RecordingEnter", {
+				callback = function()
+					vim.cmd("redrawstatus")
+				end,
+			})
+			vim.api.nvim_create_autocmd("RecordingLeave", {
+				callback = function()
+					vim.cmd("redrawstatus")
+				end,
+			})
 			require("mini.tabline").setup({
 				show_icons = true,
 				section = "left",
 			})
-			vim.opt.showtabline = 1
+			vim.opt.showtabline = 2
 			-- require("mini.git").setup()
 			require("mini.indentscope").setup({ symbol = "▎" })
 
@@ -470,7 +498,9 @@ return {
 
 					-- Move, Operators
 					require("mini.move").setup()
-					require("mini.operators").setup()
+					require("mini.operators").setup({
+						replace = { prefix = "gP" },
+					})
 					vim.keymap.set("n", "(", "gxiagxila", { remap = true, desc = "Swap arg left" })
 					vim.keymap.set("n", ")", "gxiagxina", { remap = true, desc = "Swap arg right" })
 
@@ -493,7 +523,7 @@ return {
 
 					require("mini.splitjoin").setup()
 					require("mini.surround").setup()
-					require("mini.trailspace").setup()
+					-- require("mini.trailspace").setup()
 					require("mini.visits").setup()
 				end,
 			})

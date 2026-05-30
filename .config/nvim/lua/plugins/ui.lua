@@ -18,7 +18,9 @@ return {
 						style = "rounded",
 						padding = { 0, 1 },
 					},
-					filter_options = { win_options = { winhighlight = "Normal:NormalFloat,FloatBorder:NoiceCmdlinePopupBorder" } },
+					filter_options = {
+						win_options = { winhighlight = "Normal:NormalFloat,FloatBorder:NoiceCmdlinePopupBorder" },
+					},
 				},
 				popupmenu = {
 					relative = "editor",
@@ -66,7 +68,11 @@ return {
 	{
 		"mikesmithgh/kitty-scrollback.nvim",
 		lazy = true,
-		cmd = { "KittyScrollbackGenerateKittens", "KittyScrollbackCheckHealth", "KittyScrollbackGenerateCommandLineEditing" },
+		cmd = {
+			"KittyScrollbackGenerateKittens",
+			"KittyScrollbackCheckHealth",
+			"KittyScrollbackGenerateCommandLineEditing",
+		},
 		event = { "User KittyScrollbackLaunch" },
 		config = function()
 			require("kitty-scrollback").setup()
@@ -107,6 +113,7 @@ return {
 		ft = { "markdown", "Avante" },
 		dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" },
 		opts = {
+		anti_conceal = { enabled = false },
 			code = {
 				style = "language",
 				sign = false,
@@ -200,14 +207,5 @@ return {
 		config = function()
 			require("harpoon"):setup()
 		end,
-	},
-	{
-		"chrisgrieser/nvim-spider",
-		event = { "BufReadPre", "BufNewFile" },
-		keys = {
-			{ "w", "<cmd>lua require('spider').motion('w')<cr>", mode = { "n", "o", "x" } },
-			{ "e", "<cmd>lua require('spider').motion('e')<cr>", mode = { "n", "o", "x" } },
-			{ "b", "<cmd>lua require('spider').motion('b')<cr>", mode = { "n", "o", "x" } },
-		},
 	},
 }

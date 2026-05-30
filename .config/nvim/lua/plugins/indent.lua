@@ -21,7 +21,7 @@ return {
 		config = function(_, opts)
 			local hooks = require("ibl.hooks")
 			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-				vim.api.nvim_set_hl(0, "IblIndentGray", { fg = "#3f4247", nocombine = true })
+				vim.api.nvim_set_hl(0, "IblIndentGray", { fg = "#191919", nocombine = true })
 			end)
 			require("ibl").setup(opts)
 		end,
