@@ -35,25 +35,27 @@ abbr gs "git status"
 
 function ati
     set curr_dir $PWD
-    cd ~/mule 
+    cd ~/mule
     bass source env.dev.sh
     cd $curr_dir
 
     # Temporary, needed for acados in mpc
     set -x ACADOS_SOURCE_DIR $HOME/repos/acados
-    set -x LD_LIBRARY_PATH $LD_LIBRARY_PATH $ACADOS_SOURCE_DIR/lib
+    set -x LD_LIBRARY_PATH $ACADOS_SOURCE_DIR/lib $LD_LIBRARY_PATH
 end
 
 function viz
     set curr_dir $PWD
-    cd ~/mule 
+    cd ~/mule
     echo "Current Branch: $(git branch --show-current)"
     bass source env.dev.sh
     if test -e ati/core
-        cd ati/common/schema; protoc --python_out=. messages.proto
+        cd ati/common/schema
+        protoc --python_out=. messages.proto
         cd ../../..
     else
-        cd ati/schema; protoc --python_out=. messages.proto
+        cd ati/schema
+        protoc --python_out=. messages.proto
         cd ../..
     end
     cd
@@ -94,7 +96,7 @@ end
 # end
 
 function starship_transient_rprompt_func
-  starship module time
+    starship module time
 end
 
 # sourcing apps 
@@ -105,3 +107,7 @@ enable_transience
 
 # opencode
 fish_add_path /home/dhruvpotdar/.opencode/bin
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/home/dhruvpotdar/.local/bin" $PATH
