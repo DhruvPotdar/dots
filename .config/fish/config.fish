@@ -22,6 +22,7 @@ abbr fconf 'nvim ~/.config/fish/config.fish'
 abbr sconf 'nvim ~/.ssh/config'
 
 set -gx EDITOR nvim
+set -x DBX_CONTAINER_MANAGER docker
 set -x MANPAGER "nvim +Man!"
 set -x MANWIDTH 999
 
