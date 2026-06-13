@@ -96,8 +96,8 @@ if not test -d /opt/ros/
     return 0
 end
 
-if not type -q bass
-    __ros2_fish_echo "bass (https://github.com/edc/bass) not installed"
+if not type -q replay
+    __ros2_fish_echo "replay (https://github.com/jorgebucaran/replay.fish) not installed"
     return 0
 end
 
@@ -122,7 +122,7 @@ if not set -q ROS_DISTRO
 end
 
 # __ros2_fish_echo "sourcing /opt/ros/$ROS_DISTRO/setup.bash"
-bass source /opt/ros/$ROS_DISTRO/setup.bash
+replay source /opt/ros/$ROS_DISTRO/setup.bash
 
 set -l argcomplete
 if command -q register-python-argcomplete

@@ -35,9 +35,36 @@ abbr gs "git status"
 
 
 function ati
+    # Find all mule worktrees, get their git branch, and display in a nice fzf window
+    set selected_line (for dir in $HOME/mule*
+        if test -d $dir
+            set branch (git -C $dir branch --show-current 2>/dev/null)
+            set base (basename $dir)
+            if test -n "$branch"
+                printf "%-20s [%s]\n" "$base" "$branch"
+            else
+                printf "%s\n" "$base"
+            end
+        end
+    end | fzf \
+        --prompt="📂 Select mule worktree ❯ " \
+        --border=rounded \
+        --margin=5% \
+        --padding=2% \
+        --layout=reverse \
+        --info=inline \
+        --pointer="▶" \
+        --color="pointer:#ff79c6,prompt:#50fa7b")
+
+    if test -z "$selected_line"
+        return
+    end
+
+    # Extract just the directory name (first word)
+    set selected_mule (echo $selected_line | awk '{print $1}')
     set curr_dir $PWD
-    cd ~/mule
-    bass source env.dev.sh
+    cd $HOME/$selected_mule
+    replay source env.dev.sh
     cd $curr_dir
 
     # Temporary, needed for acados in mpc
@@ -46,10 +73,36 @@ function ati
 end
 
 function viz
+    set selected_line (for dir in $HOME/mule*
+        if test -d $dir
+            set branch (git -C $dir branch --show-current 2>/dev/null)
+            set base (basename $dir)
+            if test -n "$branch"
+                printf "%-20s [%s]\n" "$base" "$branch"
+            else
+                printf "%s\n" "$base"
+            end
+        end
+    end | fzf \
+        --prompt="📂 Select mule worktree ❯ " \
+        --border=rounded \
+        --margin=5% \
+        --padding=2% \
+        --layout=reverse \
+        --info=inline \
+        --pointer="▶" \
+        --color="pointer:#ff79c6,prompt:#50fa7b")
+
+    if test -z "$selected_line"
+        return
+    end
+
+    set selected_mule (echo $selected_line | awk '{print $1}')
+    set selected_mule_path $HOME/$selected_mule
     set curr_dir $PWD
-    cd ~/mule
+    cd $selected_mule_path
     echo "Current Branch: $(git branch --show-current)"
-    bass source env.dev.sh
+    replay source env.dev.sh
     if test -e ati/core
         cd ati/common/schema
         protoc --python_out=. messages.proto
@@ -60,7 +113,7 @@ function viz
         cd ../..
     end
     cd
-    streamlit run ~/mule/ati/tools/visualizer/visualizer.py
+    streamlit run $selected_mule_path/ati/tools/visualizer/visualizer.py
     echo $curr_dir
     cd $curr_dir
 end
