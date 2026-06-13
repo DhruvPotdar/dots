@@ -258,8 +258,23 @@ return {
 			require("mini.tabline").setup({
 				show_icons = true,
 				section = "left",
+				set_vim_settings = false,
 			})
-			vim.opt.showtabline = 2
+			vim.api.nvim_create_autocmd({ "BufEnter", "BufAdd", "BufDelete", "VimEnter" }, {
+				group = vim.api.nvim_create_augroup("AutoHideTabline", { clear = true }),
+				callback = function()
+					vim.schedule(function()
+						local bufs = vim.tbl_filter(function(b)
+							return vim.api.nvim_buf_is_valid(b) and vim.bo[b].buflisted
+						end, vim.api.nvim_list_bufs())
+						if #bufs > 1 then
+							vim.opt.showtabline = 2
+						else
+							vim.opt.showtabline = 0
+						end
+					end)
+				end,
+			})
 			-- require("mini.git").setup()
 			require("mini.indentscope").setup({ symbol = "▎" })
 
