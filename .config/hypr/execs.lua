@@ -7,6 +7,7 @@
 hl.on("hyprland.start", function()
     -- Core components (authentication, lock screen)
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
+    hl.exec_cmd("/usr/libexec/hyprpolkitagent &")
 
     -- Wallpaper managers
     hl.exec_cmd("hyprpaper")
