@@ -13,6 +13,13 @@ hl.monitor({
     scale    = 1.0,
 })
 
+-- Mirror any additional display onto eDP-1 instead of extending
+hl.monitor({
+    output = "",
+    mode   = "preferred",
+    mirror = "eDP-1",
+})
+
 -- ── Gestures (three-finger / four-finger) ───────────────────────────────────
 hl.gesture({ fingers = 3, direction = "pinch",      action = "float"      })
 hl.gesture({ fingers = 3, direction = "horizontal",  action = "workspace"  })
