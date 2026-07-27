@@ -31,22 +31,7 @@ local function current_file()
   return vim.fn.fnamemodify(f, ':p') -- normalized absolute path
 end
 
-local function git_root()
-  local file = current_file()
-  if not file then
-    return nil
-  end
 
-  local dir = vim.fn.fnamemodify(file, ':h')
-  local out = vim.fn.systemlist { 'git', '-C', dir, 'rev-parse', '--show-toplevel' }
-
-  if vim.v.shell_error ~= 0 or not out[1] then
-    vim.notify('Not inside a git repository', vim.log.levels.ERROR)
-    return nil
-  end
-
-  return vim.fn.fnamemodify(vim.trim(out[1]), ':p')
-end
 
 local function relative_path()
   local file = current_file()
@@ -55,22 +40,27 @@ local function relative_path()
   end
 
   local dir = vim.fn.fnamemodify(file, ':h')
-
-  local out = vim.fn.systemlist {
-    'git',
-    '-C',
-    dir,
-    'ls-files',
-    '--full-name',
-    file,
-  }
-
-  if vim.v.shell_error ~= 0 or not out[1] then
-    vim.notify('File is not tracked by git', vim.log.levels.ERROR)
+  
+  local top_root = vim.trim(vim.fn.systemlist({ 'git', '-C', dir, 'rev-parse', '--show-toplevel' })[1] or '')
+  if top_root == '' then
+    vim.notify('Not inside a git repository', vim.log.levels.ERROR)
     return nil
   end
 
-  return vim.trim(out[1])
+  while true do
+    local super = vim.trim(vim.fn.systemlist({ 'git', '-C', top_root, 'rev-parse', '--show-superproject-working-tree' })[1] or '')
+    if super == '' then
+      break
+    end
+    top_root = super
+  end
+
+  if vim.startswith(file, top_root) then
+    return file:sub(#top_root + 2)
+  end
+
+  vim.notify('Could not determine relative path', vim.log.levels.ERROR)
+  return nil
 end
 local function ssh_target(ip)
   return string.format('%s@%s', M.config.default_user, ip)
@@ -95,10 +85,10 @@ local function ensure_remote_path(opts, callback)
       opts.ssh,
       'docker',
       'exec',
-      opts.container,
+      vim.fn.shellescape(opts.container),
       'test',
       '-e',
-      opts.remote_path,
+      vim.fn.shellescape(opts.remote_path),
     }
 
     local success = run_command(check_cmd)
@@ -124,15 +114,16 @@ local function ensure_remote_path(opts, callback)
 
         local parent_dir = vim.fn.fnamemodify(opts.remote_path, ':h')
 
+        local inner_cmd = string.format('mkdir -p %s && touch %s', vim.fn.shellescape(parent_dir), vim.fn.shellescape(opts.remote_path))
         local mkdir_cmd = {
           'ssh',
           opts.ssh,
           'docker',
           'exec',
-          opts.container,
+          vim.fn.shellescape(opts.container),
           'sh',
           '-c',
-          string.format('mkdir -p %s && touch %s', vim.fn.shellescape(parent_dir), vim.fn.shellescape(opts.remote_path)),
+          vim.fn.shellescape(inner_cmd),
         }
 
         local create_success, output = run_command(mkdir_cmd)
@@ -204,8 +195,8 @@ local function copy_file(opts)
                 opts.ssh,
                 'docker',
                 'cp',
-                remote_tmp,
-                opts.container .. ':' .. remote_final,
+                vim.fn.shellescape(remote_tmp),
+                vim.fn.shellescape(opts.container .. ':' .. remote_final),
               }
 
               local docker_success, docker_output = run_command(docker_cp_cmd)
@@ -222,7 +213,7 @@ local function copy_file(opts)
                   opts.ssh,
                   'rm',
                   '-f',
-                  remote_tmp,
+                  vim.fn.shellescape(remote_tmp),
                 }
 
                 vim.defer_fn(function()
