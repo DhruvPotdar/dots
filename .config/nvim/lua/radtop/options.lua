@@ -94,12 +94,12 @@ opt.completeopt = "menu,menuone,noselect" -- Comfortable completion UI
 opt.splitright = true -- New window to the right
 opt.splitbelow = false -- Keep new windows above by default (false)
 opt.splitkeep = "screen"
-opt.sidescrolloff = 8 -- Horizontal context columns
-opt.scrolloff = 15 -- Vertical context lines
+-- opt.sidescrolloff = 8 -- Horizontal context columns
+-- opt.scrolloff = 5 -- Vertical context lines
 
 -- ======= Mouse / Input =======
 opt.mouse = "a" -- Enable mouse support in all modes
-opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Short timeout for mapped sequences
+-- opt.timeoutlen = vim.g.vscode and 1000 or 300 -- Short timeout for mapped sequences
 
 -- ======= Performance / UX tweaks =======
 opt.updatetime = 300 -- Faster CursorHold and swap writing
@@ -112,6 +112,6 @@ vim.g.markdown_recommended_style = 0
 -- Optional/placeholder settings (commented out for clarity)
 -- opt.formatexpr = "v:lua.require'radtop.utils'.formatexpr()"
 -- opt.formatoptions = 'jcroqlnt' -- tcqj
--- opt.smoothscroll = true
+opt.smoothscroll = true
 
 -- Diagnostic config lives in lua/radtop/lsp.lua (consolidated there)

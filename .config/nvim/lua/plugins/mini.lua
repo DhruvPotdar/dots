@@ -400,7 +400,18 @@ return {
 
 					-- Align, Animate, Bracketed, Bufremove
 					require("mini.align").setup()
-					require("mini.animate").setup()
+					local animate = require("mini.animate")
+					animate.setup({
+						scroll = {
+							enable = true,
+							subscroll = animate.gen_subscroll.equal({
+								predicate = function(total_scroll)
+									-- Ignore trackpad/mouse scrolls (which are typically 1-3 lines)
+									return total_scroll > 3
+								end,
+							}),
+						},
+					})
 					require("mini.bracketed").setup()
 					require("mini.bufremove").setup()
 
