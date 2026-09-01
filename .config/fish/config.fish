@@ -72,6 +72,11 @@ function ati
     set -x LD_LIBRARY_PATH $ACADOS_SOURCE_DIR/lib $LD_LIBRARY_PATH
 end
 
+
+function wati
+    nmcli dev wifi connect ATIDEV password DevWi20@22
+end
+
 function viz
     set selected_line (for dir in $HOME/mule*
         if test -d $dir
