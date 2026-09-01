@@ -3,6 +3,6 @@ Here are the config files for most of the tools I use on a daily basis on my lap
 # How to use?
 
 - Clone the repository to your home directory
-- Install the 'stow' package
+- Install the 'stow' package (`sudo apt install stow`)
 - Run stow . in the root folder of the repo
 - Done!
