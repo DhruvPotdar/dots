@@ -1,0 +1,52 @@
+# custom.pipeline
+# A combination of cursor-trail-blaze, focus-highlight, and bloom
+
+# Group 1: Cursor trail (blaze)
+startgroup
+    animation_start cursor-trail-move
+    animation_stop cursor-trail-stop
+    
+    # Custom color settings for the blaze trail (cyan/blue example)
+    # Colors are in RGBA format (values from 0.0 to 1.0)
+    var float4 TRAIL_COLOR = float4(0.3098, 0.3098, 0.4078, 1.0)
+    var float4 TRAIL_COLOR_ACCENT = float4(0.3098, 0.3098, 0.4078, 1.0)
+    
+    # Duration of the trail in seconds
+    var float DURATION = 0.5
+    
+    shaders cursor-trail-blaze
+endgroup
+
+# Group 2: Focus highlight
+startgroup
+    animation_start window-focus-in
+    animation_stop 750
+    animation_curve ease-in
+    animation_step 16
+
+    # Configurable variables for focus-highlight
+    var float HIGHLIGHT_INTENSITY = 0.20
+    var float BORDER_WIDTH = 0.04
+    var float BORDER_GLOW = 0.55
+    var float INACTIVE_DIM = 0.3
+    var float3 INACTIVE_DIM_COLOR = float3(0.0)
+    var bool DIM_CENTRAL_AREA_ONLY = false
+    var bool INCLUDE_WINDOW_PADDING = false
+
+    shaders focus-highlight
+endgroup
+
+# # Group 3: Bloom (light bleed)
+startgroup
+    # Run only when the content actually changes to save GPU
+    animation_step 0
+
+    # Configurable bloom parameters
+    # BLOOM_THRESHOLD sets the minimum luminance required to bleed light
+    var float BLOOM_THRESHOLD = 0.2
+
+    # BLOOM_STRENGTH sets how bright the bleed effect is
+    var float BLOOM_STRENGTH = 0.01
+
+    shaders bloom
+endgroup
